@@ -1,7 +1,4 @@
-/logs
-/working_copies
+/logs/*
 /vendor*
 composer.lock
-/scripts
 .idea
-
