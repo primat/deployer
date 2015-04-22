@@ -1,0 +1,7 @@
+/logs
+/working_copies
+/vendor*
+composer.lock
+/scripts
+.idea
+

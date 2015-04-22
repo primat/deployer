@@ -1,0 +1,12 @@
+{
+	"require": {
+        "phpmailer/phpmailer": "dev-master",
+        "phpseclib/phpseclib": "0.3.*@dev",
+        "phpunit/phpunit": "4.2.*@dev"
+    },
+	"autoload": {
+        "psr-4": {
+            "Deployer\\": [ "source/php/libs/Deployer", "dev/phpunit/Deployer" ]
+		}
+    }
+}
