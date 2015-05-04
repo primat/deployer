@@ -18,7 +18,7 @@
     },
 	"autoload": {
         "psr-4": {
-            "Deployer\\": [ "source/php/libs/Deployer", "tests/phpunit/Deployer" ]
+            "Deployer\\": [ "src/php/libs/Deployer", "tests/phpunit/Deployer" ]
 		}
     }
 }
