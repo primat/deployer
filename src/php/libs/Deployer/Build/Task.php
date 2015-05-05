@@ -1,5 +1,6 @@
 <?php namespace Deployer\Build;
 
+use \Deployer\App;
 use \Deployer\Build\Exception\CommandException;
 use \Deployer\Build\Exception\ExitStatusException;
 
@@ -180,7 +181,7 @@ class Task
 	public static function outputElapsedTime()
 	{
 		$endTime = time();
-		$elapsedTime = $endTime - Build::getStartTime();
+		$elapsedTime = $endTime - App::getStartTime();
 
 		if ($elapsedTime === $endTime) {
 			$elapsedTime = 0;

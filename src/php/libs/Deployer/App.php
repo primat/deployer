@@ -3,17 +3,13 @@
 use \Deployer\Build\Config;
 
 /**
- * Class for handling application operations such as exception handlers, autoloaders, shutdown functions, etc
+ * Class for handling application operations such as exception handlers, shutdown functions, etc
  */
 
 class App
 {
 	/** @var int $startTime The time that the build script started running */
 	private static $startTime = 0;
-
-	/** @var string $projectName */
-	//private static $projectName = '..';
-
 
 	/**
 	 * Initialize the build app
@@ -86,44 +82,21 @@ class App
 		/*
 		 * Register some important handlers
 		 */
-		spl_autoload_register(array('self', 'autoload'));
 		set_exception_handler(array('\Deployer\Build\Task', 'exceptionHandler'));
 		register_shutdown_function(array('\Deployer\Build\Task', 'endOfScriptMaintenance'));
 
 		/*
 		 * Load the default build configuration
 		 */
-		//Config::loadFile(BUILD_ROOT_DIR . '/config-default.php');
 		Config::set('datetime.slug', date('Y-m-d_H-i-s'));
 	}
 
 	/**
-	 * Gets the script start time (Either 0 or the first time when Build::init() was called)
+	 * Gets the script start time (Either 0 or the first time when App::init() was called)
 	 */
 	public static function getStartTime()
 	{
 		return self::$startTime;
-	}
-
-	/**
-	 * The class autoloader function
-	 * @param $className
-	 */
-	public static function autoload($className)
-	{
-		if (strpos($className, '\\') === FALSE) { return; }
-
-		$className = ltrim($className, '\\');
-		$fileName  = '';
-		$namespace = '';
-		if ($lastNsPos = strrpos($className, '\\')) {
-			$namespace = substr($className, 0, $lastNsPos);
-			$className = substr($className, $lastNsPos + 1);
-			$fileName  = str_replace('\\', DIRECTORY_SEPARATOR, $namespace) . DIRECTORY_SEPARATOR;
-		}
-		$fileName .= str_replace('_', DIRECTORY_SEPARATOR, $className) . '.php';
-
-		require_once __DIR__ . '/../' . $fileName;
 	}
 
 	/**
@@ -137,30 +110,4 @@ class App
 		ini_set('implicit_flush', true);
 		ob_implicit_flush(true);
 	}
-
-//	public static function getCacheFolder()
-//	{
-//		$path = BUILD_ROOT_DIR . DIRECTORY_SEPARATOR . 'cache';
-//		if (! empty(self::$projectName)) {
-//			$path .= DIRECTORY_SEPARATOR . self::$projectName;
-//		}
-//		echo $path;exit;
-//		return $path;
-//	}
-//
-//	/**
-//	 *
-//	 */
-//	public static function getProjectName()
-//	{
-//		return self::$projectName;
-//	}
-//
-//	/**
-//	 * @param $name
-//	 */
-//	public static function setProjectName($name)
-//	{
-//		self::$projectName = $name;
-//	}
 }
