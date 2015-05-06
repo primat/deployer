@@ -1,6 +1,6 @@
 <?php namespace Deployer;
 
-use \Deployer\Build\Config;
+use \Deployer\Config;
 
 /**
  * Class for handling application operations such as exception handlers, shutdown functions, etc
@@ -9,7 +9,7 @@ use \Deployer\Build\Config;
 class App
 {
 	/** @var int $startTime The time that the build script started running */
-	private static $startTime = 0;
+	protected static $startTime = 0;
 
 	/**
 	 * Initialize the build app
@@ -82,8 +82,8 @@ class App
 		/*
 		 * Register some important handlers
 		 */
-		set_exception_handler(array('\Deployer\Build\Task', 'exceptionHandler'));
-		register_shutdown_function(array('\Deployer\Build\Task', 'endOfScriptMaintenance'));
+		set_exception_handler(array('\Deployer\Task', 'exceptionHandler'));
+		register_shutdown_function(array('\Deployer\Task', 'endOfScriptMaintenance'));
 
 		/*
 		 * Load the default build configuration
@@ -97,6 +97,14 @@ class App
 	public static function getStartTime()
 	{
 		return self::$startTime;
+	}
+
+	/**
+	 * Gets the directory to the application root
+	 */
+	public static function getAppRootDir()
+	{
+		return realpath(__DIR__ . '/../../../../') . '/';
 	}
 
 	/**

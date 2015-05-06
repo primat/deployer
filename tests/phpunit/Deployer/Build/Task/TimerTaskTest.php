@@ -1,6 +1,6 @@
-<?php namespace Deployer\Build\Task;
+<?php namespace Deployer\Task;
 
-use Deployer\Build\Task;
+use Deployer\Task;
 
 /**
  * The TimerTask class is a chronometer for measuring script execution time

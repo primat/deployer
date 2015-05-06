@@ -2834,7 +2834,7 @@ class DB extends Illuminate\Support\Facades\DB{
 	 * Begin a fluent query against a database table.
 	 *
 	 * @param string  $table
-	 * @return \Illuminate\Database\Query\Builder
+	 * @return \Illuminate\Database\Queryer
 	 * @static 
 	 */
 	 public static function table($table){
@@ -3465,7 +3465,7 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 * @static 
 	 */
 	 public static function findMany($id, $columns = array()){
-		return Illuminate\Database\Eloquent\Builder::findMany($id, $columns);
+		return Illuminate\Database\Eloquenter::findMany($id, $columns);
 	 }
 
 	/**
@@ -3476,7 +3476,7 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 * @static 
 	 */
 	 public static function first($columns = array()){
-		return Illuminate\Database\Eloquent\Builder::first($columns);
+		return Illuminate\Database\Eloquenter::first($columns);
 	 }
 
 	/**
@@ -3488,7 +3488,7 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 * @static 
 	 */
 	 public static function firstOrFail($columns = array()){
-		return Illuminate\Database\Eloquent\Builder::firstOrFail($columns);
+		return Illuminate\Database\Eloquenter::firstOrFail($columns);
 	 }
 
 	/**
@@ -3499,7 +3499,7 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 * @static 
 	 */
 	 public static function get($columns = array()){
-		return Illuminate\Database\Eloquent\Builder::get($columns);
+		return Illuminate\Database\Eloquenter::get($columns);
 	 }
 
 	/**
@@ -3510,7 +3510,7 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 * @static 
 	 */
 	 public static function pluck($column){
-		return Illuminate\Database\Eloquent\Builder::pluck($column);
+		return Illuminate\Database\Eloquenter::pluck($column);
 	 }
 
 	/**
@@ -3522,7 +3522,7 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 * @static 
 	 */
 	 public static function chunk($count, $callback){
-		 Illuminate\Database\Eloquent\Builder::chunk($count, $callback);
+		 Illuminate\Database\Eloquenter::chunk($count, $callback);
 	 }
 
 	/**
@@ -3534,7 +3534,7 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 * @static 
 	 */
 	 public static function lists($column, $key = null){
-		return Illuminate\Database\Eloquent\Builder::lists($column, $key);
+		return Illuminate\Database\Eloquenter::lists($column, $key);
 	 }
 
 	/**
@@ -3546,7 +3546,7 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 * @static 
 	 */
 	 public static function paginate($perPage = null, $columns = array()){
-		return Illuminate\Database\Eloquent\Builder::paginate($perPage, $columns);
+		return Illuminate\Database\Eloquenter::paginate($perPage, $columns);
 	 }
 
 	/**
@@ -3559,7 +3559,7 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 * @static 
 	 */
 	 public static function increment($column, $amount = 1, $extra = array()){
-		return Illuminate\Database\Eloquent\Builder::increment($column, $amount, $extra);
+		return Illuminate\Database\Eloquenter::increment($column, $amount, $extra);
 	 }
 
 	/**
@@ -3572,7 +3572,7 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 * @static 
 	 */
 	 public static function decrement($column, $amount = 1, $extra = array()){
-		return Illuminate\Database\Eloquent\Builder::decrement($column, $amount, $extra);
+		return Illuminate\Database\Eloquenter::decrement($column, $amount, $extra);
 	 }
 
 	/**
@@ -3583,7 +3583,7 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 * @static 
 	 */
 	 public static function getModels($columns = array()){
-		return Illuminate\Database\Eloquent\Builder::getModels($columns);
+		return Illuminate\Database\Eloquenter::getModels($columns);
 	 }
 
 	/**
@@ -3594,7 +3594,7 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 * @static 
 	 */
 	 public static function eagerLoadRelations($models){
-		return Illuminate\Database\Eloquent\Builder::eagerLoadRelations($models);
+		return Illuminate\Database\Eloquenter::eagerLoadRelations($models);
 	 }
 
 	/**
@@ -3604,11 +3604,11 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 * @param string  $operator
 	 * @param mixed   $value
 	 * @param string  $boolean
-	 * @return \Illuminate\Database\Eloquent\Builder|static
+	 * @return \Illuminate\Database\Eloquenter|static
 	 * @static 
 	 */
 	 public static function where($column, $operator = null, $value = null, $boolean = 'and'){
-		return Illuminate\Database\Eloquent\Builder::where($column, $operator, $value, $boolean);
+		return Illuminate\Database\Eloquenter::where($column, $operator, $value, $boolean);
 	 }
 
 	/**
@@ -3617,11 +3617,11 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 * @param string  $column
 	 * @param string  $operator
 	 * @param mixed   $value
-	 * @return \Illuminate\Database\Eloquent\Builder|static
+	 * @return \Illuminate\Database\Eloquenter|static
 	 * @static 
 	 */
 	 public static function orWhere($column, $operator = null, $value = null){
-		return Illuminate\Database\Eloquent\Builder::orWhere($column, $operator, $value);
+		return Illuminate\Database\Eloquenter::orWhere($column, $operator, $value);
 	 }
 
 	/**
@@ -3632,11 +3632,11 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 * @param int     $count
 	 * @param string  $boolean
 	 * @param \Closure  $callback
-	 * @return \Illuminate\Database\Eloquent\Builder|static
+	 * @return \Illuminate\Database\Eloquenter|static
 	 * @static 
 	 */
 	 public static function has($relation, $operator = '>=', $count = 1, $boolean = 'and', $callback = null){
-		return Illuminate\Database\Eloquent\Builder::has($relation, $operator, $count, $boolean, $callback);
+		return Illuminate\Database\Eloquenter::has($relation, $operator, $count, $boolean, $callback);
 	 }
 
 	/**
@@ -3646,11 +3646,11 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 * @param \Closure  $callback
 	 * @param string  $operator
 	 * @param int     $count
-	 * @return \Illuminate\Database\Eloquent\Builder|static
+	 * @return \Illuminate\Database\Eloquenter|static
 	 * @static 
 	 */
 	 public static function whereHas($relation, $callback, $operator = '>=', $count = 1){
-		return Illuminate\Database\Eloquent\Builder::whereHas($relation, $callback, $operator, $count);
+		return Illuminate\Database\Eloquenter::whereHas($relation, $callback, $operator, $count);
 	 }
 
 	/**
@@ -3659,11 +3659,11 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 * @param string  $relation
 	 * @param string  $operator
 	 * @param int     $count
-	 * @return \Illuminate\Database\Eloquent\Builder|static
+	 * @return \Illuminate\Database\Eloquenter|static
 	 * @static 
 	 */
 	 public static function orHas($relation, $operator = '>=', $count = 1){
-		return Illuminate\Database\Eloquent\Builder::orHas($relation, $operator, $count);
+		return Illuminate\Database\Eloquenter::orHas($relation, $operator, $count);
 	 }
 
 	/**
@@ -3673,32 +3673,32 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 * @param \Closure  $callback
 	 * @param string  $operator
 	 * @param int     $count
-	 * @return \Illuminate\Database\Eloquent\Builder|static
+	 * @return \Illuminate\Database\Eloquenter|static
 	 * @static 
 	 */
 	 public static function orWhereHas($relation, $callback, $operator = '>=', $count = 1){
-		return Illuminate\Database\Eloquent\Builder::orWhereHas($relation, $callback, $operator, $count);
+		return Illuminate\Database\Eloquenter::orWhereHas($relation, $callback, $operator, $count);
 	 }
 
 	/**
 	 * Get the underlying query builder instance.
 	 *
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Illuminate\Database\Queryer|static
 	 * @static 
 	 */
 	 public static function getQuery(){
-		return Illuminate\Database\Eloquent\Builder::getQuery();
+		return Illuminate\Database\Eloquenter::getQuery();
 	 }
 
 	/**
 	 * Set the underlying query builder instance.
 	 *
-	 * @param \Illuminate\Database\Query\Builder  $query
+	 * @param \Illuminate\Database\Queryer  $query
 	 * @return void
 	 * @static 
 	 */
 	 public static function setQuery($query){
-		 Illuminate\Database\Eloquent\Builder::setQuery($query);
+		 Illuminate\Database\Eloquenter::setQuery($query);
 	 }
 
 	/**
@@ -3708,7 +3708,7 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 * @static 
 	 */
 	 public static function getEagerLoads(){
-		return Illuminate\Database\Eloquent\Builder::getEagerLoads();
+		return Illuminate\Database\Eloquenter::getEagerLoads();
 	 }
 
 	/**
@@ -3719,7 +3719,7 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 * @static 
 	 */
 	 public static function setEagerLoads($eagerLoad){
-		 Illuminate\Database\Eloquent\Builder::setEagerLoads($eagerLoad);
+		 Illuminate\Database\Eloquenter::setEagerLoads($eagerLoad);
 	 }
 
 	/**
@@ -3729,72 +3729,72 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 * @static 
 	 */
 	 public static function getModel(){
-		return Illuminate\Database\Eloquent\Builder::getModel();
+		return Illuminate\Database\Eloquenter::getModel();
 	 }
 
 	/**
 	 * Set a model instance for the model being queried.
 	 *
 	 * @param \Illuminate\Database\Eloquent\Model  $model
-	 * @return \Illuminate\Database\Eloquent\Builder
+	 * @return \Illuminate\Database\Eloquenter
 	 * @static 
 	 */
 	 public static function setModel($model){
-		return Illuminate\Database\Eloquent\Builder::setModel($model);
+		return Illuminate\Database\Eloquenter::setModel($model);
 	 }
 
 	/**
 	 * Set the columns to be selected.
 	 *
 	 * @param array  $columns
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Illuminate\Database\Queryer|static
 	 * @static 
 	 */
 	 public static function select($columns = array()){
-		return Illuminate\Database\Query\Builder::select($columns);
+		return Illuminate\Database\Queryer::select($columns);
 	 }
 
 	/**
 	 * Add a new "raw" select expression to the query.
 	 *
 	 * @param string  $expression
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Illuminate\Database\Queryer|static
 	 * @static 
 	 */
 	 public static function selectRaw($expression){
-		return Illuminate\Database\Query\Builder::selectRaw($expression);
+		return Illuminate\Database\Queryer::selectRaw($expression);
 	 }
 
 	/**
 	 * Add a new select column to the query.
 	 *
 	 * @param mixed  $column
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Illuminate\Database\Queryer|static
 	 * @static 
 	 */
 	 public static function addSelect($column){
-		return Illuminate\Database\Query\Builder::addSelect($column);
+		return Illuminate\Database\Queryer::addSelect($column);
 	 }
 
 	/**
 	 * Force the query to only return distinct results.
 	 *
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Illuminate\Database\Queryer|static
 	 * @static 
 	 */
 	 public static function distinct(){
-		return Illuminate\Database\Query\Builder::distinct();
+		return Illuminate\Database\Queryer::distinct();
 	 }
 
 	/**
 	 * Set the table which the query is targeting.
 	 *
 	 * @param string  $table
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Illuminate\Database\Queryer|static
 	 * @static 
 	 */
 	 public static function from($table){
-		return Illuminate\Database\Query\Builder::from($table);
+		return Illuminate\Database\Queryer::from($table);
 	 }
 
 	/**
@@ -3806,11 +3806,11 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 * @param string  $two
 	 * @param string  $type
 	 * @param bool  $where
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Illuminate\Database\Queryer|static
 	 * @static 
 	 */
 	 public static function join($table, $one, $operator = null, $two = null, $type = 'inner', $where = false){
-		return Illuminate\Database\Query\Builder::join($table, $one, $operator, $two, $type, $where);
+		return Illuminate\Database\Queryer::join($table, $one, $operator, $two, $type, $where);
 	 }
 
 	/**
@@ -3821,11 +3821,11 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 * @param string  $operator
 	 * @param string  $two
 	 * @param string  $type
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Illuminate\Database\Queryer|static
 	 * @static 
 	 */
 	 public static function joinWhere($table, $one, $operator, $two, $type = 'inner'){
-		return Illuminate\Database\Query\Builder::joinWhere($table, $one, $operator, $two, $type);
+		return Illuminate\Database\Queryer::joinWhere($table, $one, $operator, $two, $type);
 	 }
 
 	/**
@@ -3835,11 +3835,11 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 * @param string  $first
 	 * @param string  $operator
 	 * @param string  $second
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Illuminate\Database\Queryer|static
 	 * @static 
 	 */
 	 public static function leftJoin($table, $first, $operator = null, $second = null){
-		return Illuminate\Database\Query\Builder::leftJoin($table, $first, $operator, $second);
+		return Illuminate\Database\Queryer::leftJoin($table, $first, $operator, $second);
 	 }
 
 	/**
@@ -3849,11 +3849,11 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 * @param string  $first
 	 * @param string  $operator
 	 * @param string  $two
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Illuminate\Database\Queryer|static
 	 * @static 
 	 */
 	 public static function leftJoinWhere($table, $one, $operator, $two){
-		return Illuminate\Database\Query\Builder::leftJoinWhere($table, $one, $operator, $two);
+		return Illuminate\Database\Queryer::leftJoinWhere($table, $one, $operator, $two);
 	 }
 
 	/**
@@ -3862,11 +3862,11 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 * @param string  $sql
 	 * @param array   $bindings
 	 * @param string  $boolean
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Illuminate\Database\Queryer|static
 	 * @static 
 	 */
 	 public static function whereRaw($sql, $bindings = array(), $boolean = 'and'){
-		return Illuminate\Database\Query\Builder::whereRaw($sql, $bindings, $boolean);
+		return Illuminate\Database\Queryer::whereRaw($sql, $bindings, $boolean);
 	 }
 
 	/**
@@ -3874,11 +3874,11 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 *
 	 * @param string  $sql
 	 * @param array   $bindings
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Illuminate\Database\Queryer|static
 	 * @static 
 	 */
 	 public static function orWhereRaw($sql, $bindings = array()){
-		return Illuminate\Database\Query\Builder::orWhereRaw($sql, $bindings);
+		return Illuminate\Database\Queryer::orWhereRaw($sql, $bindings);
 	 }
 
 	/**
@@ -3888,11 +3888,11 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 * @param array   $values
 	 * @param string  $boolean
 	 * @param bool  $not
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Illuminate\Database\Queryer|static
 	 * @static 
 	 */
 	 public static function whereBetween($column, $values, $boolean = 'and', $not = false){
-		return Illuminate\Database\Query\Builder::whereBetween($column, $values, $boolean, $not);
+		return Illuminate\Database\Queryer::whereBetween($column, $values, $boolean, $not);
 	 }
 
 	/**
@@ -3901,11 +3901,11 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 * @param string  $column
 	 * @param array   $values
 	 * @param bool  $not
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Illuminate\Database\Queryer|static
 	 * @static 
 	 */
 	 public static function orWhereBetween($column, $values, $not = false){
-		return Illuminate\Database\Query\Builder::orWhereBetween($column, $values, $not);
+		return Illuminate\Database\Queryer::orWhereBetween($column, $values, $not);
 	 }
 
 	/**
@@ -3914,11 +3914,11 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 * @param string  $column
 	 * @param array   $values
 	 * @param string  $boolean
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Illuminate\Database\Queryer|static
 	 * @static 
 	 */
 	 public static function whereNotBetween($column, $values, $boolean = 'and'){
-		return Illuminate\Database\Query\Builder::whereNotBetween($column, $values, $boolean);
+		return Illuminate\Database\Queryer::whereNotBetween($column, $values, $boolean);
 	 }
 
 	/**
@@ -3926,11 +3926,11 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 *
 	 * @param string  $column
 	 * @param array   $values
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Illuminate\Database\Queryer|static
 	 * @static 
 	 */
 	 public static function orWhereNotBetween($column, $values){
-		return Illuminate\Database\Query\Builder::orWhereNotBetween($column, $values);
+		return Illuminate\Database\Queryer::orWhereNotBetween($column, $values);
 	 }
 
 	/**
@@ -3938,23 +3938,23 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 *
 	 * @param \Closure $callback
 	 * @param string   $boolean
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Illuminate\Database\Queryer|static
 	 * @static 
 	 */
 	 public static function whereNested($callback, $boolean = 'and'){
-		return Illuminate\Database\Query\Builder::whereNested($callback, $boolean);
+		return Illuminate\Database\Queryer::whereNested($callback, $boolean);
 	 }
 
 	/**
 	 * Add another query builder as a nested where to the query builder.
 	 *
-	 * @param \Illuminate\Database\Query\Builder|static $query
+	 * @param \Illuminate\Database\Queryer|static $query
 	 * @param string  $boolean
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Illuminate\Database\Queryer|static
 	 * @static 
 	 */
 	 public static function addNestedWhereQuery($query, $boolean = 'and'){
-		return Illuminate\Database\Query\Builder::addNestedWhereQuery($query, $boolean);
+		return Illuminate\Database\Queryer::addNestedWhereQuery($query, $boolean);
 	 }
 
 	/**
@@ -3963,11 +3963,11 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 * @param \Closure $callback
 	 * @param string   $boolean
 	 * @param bool     $not
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Illuminate\Database\Queryer|static
 	 * @static 
 	 */
 	 public static function whereExists($callback, $boolean = 'and', $not = false){
-		return Illuminate\Database\Query\Builder::whereExists($callback, $boolean, $not);
+		return Illuminate\Database\Queryer::whereExists($callback, $boolean, $not);
 	 }
 
 	/**
@@ -3975,11 +3975,11 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 *
 	 * @param \Closure $callback
 	 * @param bool     $not
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Illuminate\Database\Queryer|static
 	 * @static 
 	 */
 	 public static function orWhereExists($callback, $not = false){
-		return Illuminate\Database\Query\Builder::orWhereExists($callback, $not);
+		return Illuminate\Database\Queryer::orWhereExists($callback, $not);
 	 }
 
 	/**
@@ -3987,22 +3987,22 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 *
 	 * @param \Closure $callback
 	 * @param string   $boolean
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Illuminate\Database\Queryer|static
 	 * @static 
 	 */
 	 public static function whereNotExists($callback, $boolean = 'and'){
-		return Illuminate\Database\Query\Builder::whereNotExists($callback, $boolean);
+		return Illuminate\Database\Queryer::whereNotExists($callback, $boolean);
 	 }
 
 	/**
 	 * Add a where not exists clause to the query.
 	 *
 	 * @param \Closure  $callback
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Illuminate\Database\Queryer|static
 	 * @static 
 	 */
 	 public static function orWhereNotExists($callback){
-		return Illuminate\Database\Query\Builder::orWhereNotExists($callback);
+		return Illuminate\Database\Queryer::orWhereNotExists($callback);
 	 }
 
 	/**
@@ -4012,11 +4012,11 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 * @param mixed   $values
 	 * @param string  $boolean
 	 * @param bool    $not
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Illuminate\Database\Queryer|static
 	 * @static 
 	 */
 	 public static function whereIn($column, $values, $boolean = 'and', $not = false){
-		return Illuminate\Database\Query\Builder::whereIn($column, $values, $boolean, $not);
+		return Illuminate\Database\Queryer::whereIn($column, $values, $boolean, $not);
 	 }
 
 	/**
@@ -4024,11 +4024,11 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 *
 	 * @param string  $column
 	 * @param mixed   $values
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Illuminate\Database\Queryer|static
 	 * @static 
 	 */
 	 public static function orWhereIn($column, $values){
-		return Illuminate\Database\Query\Builder::orWhereIn($column, $values);
+		return Illuminate\Database\Queryer::orWhereIn($column, $values);
 	 }
 
 	/**
@@ -4037,11 +4037,11 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 * @param string  $column
 	 * @param mixed   $values
 	 * @param string  $boolean
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Illuminate\Database\Queryer|static
 	 * @static 
 	 */
 	 public static function whereNotIn($column, $values, $boolean = 'and'){
-		return Illuminate\Database\Query\Builder::whereNotIn($column, $values, $boolean);
+		return Illuminate\Database\Queryer::whereNotIn($column, $values, $boolean);
 	 }
 
 	/**
@@ -4049,11 +4049,11 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 *
 	 * @param string  $column
 	 * @param mixed   $values
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Illuminate\Database\Queryer|static
 	 * @static 
 	 */
 	 public static function orWhereNotIn($column, $values){
-		return Illuminate\Database\Query\Builder::orWhereNotIn($column, $values);
+		return Illuminate\Database\Queryer::orWhereNotIn($column, $values);
 	 }
 
 	/**
@@ -4062,22 +4062,22 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 * @param string  $column
 	 * @param string  $boolean
 	 * @param bool    $not
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Illuminate\Database\Queryer|static
 	 * @static 
 	 */
 	 public static function whereNull($column, $boolean = 'and', $not = false){
-		return Illuminate\Database\Query\Builder::whereNull($column, $boolean, $not);
+		return Illuminate\Database\Queryer::whereNull($column, $boolean, $not);
 	 }
 
 	/**
 	 * Add an "or where null" clause to the query.
 	 *
 	 * @param string  $column
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Illuminate\Database\Queryer|static
 	 * @static 
 	 */
 	 public static function orWhereNull($column){
-		return Illuminate\Database\Query\Builder::orWhereNull($column);
+		return Illuminate\Database\Queryer::orWhereNull($column);
 	 }
 
 	/**
@@ -4085,22 +4085,22 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 *
 	 * @param string  $column
 	 * @param string  $boolean
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Illuminate\Database\Queryer|static
 	 * @static 
 	 */
 	 public static function whereNotNull($column, $boolean = 'and'){
-		return Illuminate\Database\Query\Builder::whereNotNull($column, $boolean);
+		return Illuminate\Database\Queryer::whereNotNull($column, $boolean);
 	 }
 
 	/**
 	 * Add an "or where not null" clause to the query.
 	 *
 	 * @param string  $column
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Illuminate\Database\Queryer|static
 	 * @static 
 	 */
 	 public static function orWhereNotNull($column){
-		return Illuminate\Database\Query\Builder::orWhereNotNull($column);
+		return Illuminate\Database\Queryer::orWhereNotNull($column);
 	 }
 
 	/**
@@ -4108,22 +4108,22 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 *
 	 * @param string  $method
 	 * @param string  $parameters
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Illuminate\Database\Queryer|static
 	 * @static 
 	 */
 	 public static function dynamicWhere($method, $parameters){
-		return Illuminate\Database\Query\Builder::dynamicWhere($method, $parameters);
+		return Illuminate\Database\Queryer::dynamicWhere($method, $parameters);
 	 }
 
 	/**
 	 * Add a "group by" clause to the query.
 	 *
 	 * @param dynamic  $columns
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Illuminate\Database\Queryer|static
 	 * @static 
 	 */
 	 public static function groupBy(){
-		return Illuminate\Database\Query\Builder::groupBy();
+		return Illuminate\Database\Queryer::groupBy();
 	 }
 
 	/**
@@ -4132,11 +4132,11 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 * @param string  $column
 	 * @param string  $operator
 	 * @param string  $value
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Illuminate\Database\Queryer|static
 	 * @static 
 	 */
 	 public static function having($column, $operator = null, $value = null){
-		return Illuminate\Database\Query\Builder::having($column, $operator, $value);
+		return Illuminate\Database\Queryer::having($column, $operator, $value);
 	 }
 
 	/**
@@ -4145,11 +4145,11 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 * @param string  $sql
 	 * @param array   $bindings
 	 * @param string  $boolean
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Illuminate\Database\Queryer|static
 	 * @static 
 	 */
 	 public static function havingRaw($sql, $bindings = array(), $boolean = 'and'){
-		return Illuminate\Database\Query\Builder::havingRaw($sql, $bindings, $boolean);
+		return Illuminate\Database\Queryer::havingRaw($sql, $bindings, $boolean);
 	 }
 
 	/**
@@ -4157,11 +4157,11 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 *
 	 * @param string  $sql
 	 * @param array   $bindings
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Illuminate\Database\Queryer|static
 	 * @static 
 	 */
 	 public static function orHavingRaw($sql, $bindings = array()){
-		return Illuminate\Database\Query\Builder::orHavingRaw($sql, $bindings);
+		return Illuminate\Database\Queryer::orHavingRaw($sql, $bindings);
 	 }
 
 	/**
@@ -4169,33 +4169,33 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 *
 	 * @param string  $column
 	 * @param string  $direction
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Illuminate\Database\Queryer|static
 	 * @static 
 	 */
 	 public static function orderBy($column, $direction = 'asc'){
-		return Illuminate\Database\Query\Builder::orderBy($column, $direction);
+		return Illuminate\Database\Queryer::orderBy($column, $direction);
 	 }
 
 	/**
 	 * Add an "order by" clause for a timestamp to the query.
 	 *
 	 * @param string  $column
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Illuminate\Database\Queryer|static
 	 * @static 
 	 */
 	 public static function latest($column = 'created_at'){
-		return Illuminate\Database\Query\Builder::latest($column);
+		return Illuminate\Database\Queryer::latest($column);
 	 }
 
 	/**
 	 * Add an "order by" clause for a timestamp to the query.
 	 *
 	 * @param string  $column
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Illuminate\Database\Queryer|static
 	 * @static 
 	 */
 	 public static function oldest($column = 'created_at'){
-		return Illuminate\Database\Query\Builder::oldest($column);
+		return Illuminate\Database\Queryer::oldest($column);
 	 }
 
 	/**
@@ -4203,55 +4203,55 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 *
 	 * @param string  $sql
 	 * @param array  $bindings
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Illuminate\Database\Queryer|static
 	 * @static 
 	 */
 	 public static function orderByRaw($sql, $bindings = array()){
-		return Illuminate\Database\Query\Builder::orderByRaw($sql, $bindings);
+		return Illuminate\Database\Queryer::orderByRaw($sql, $bindings);
 	 }
 
 	/**
 	 * Set the "offset" value of the query.
 	 *
 	 * @param int  $value
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Illuminate\Database\Queryer|static
 	 * @static 
 	 */
 	 public static function offset($value){
-		return Illuminate\Database\Query\Builder::offset($value);
+		return Illuminate\Database\Queryer::offset($value);
 	 }
 
 	/**
 	 * Alias to set the "offset" value of the query.
 	 *
 	 * @param int  $value
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Illuminate\Database\Queryer|static
 	 * @static 
 	 */
 	 public static function skip($value){
-		return Illuminate\Database\Query\Builder::skip($value);
+		return Illuminate\Database\Queryer::skip($value);
 	 }
 
 	/**
 	 * Set the "limit" value of the query.
 	 *
 	 * @param int  $value
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Illuminate\Database\Queryer|static
 	 * @static 
 	 */
 	 public static function limit($value){
-		return Illuminate\Database\Query\Builder::limit($value);
+		return Illuminate\Database\Queryer::limit($value);
 	 }
 
 	/**
 	 * Alias to set the "limit" value of the query.
 	 *
 	 * @param int  $value
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Illuminate\Database\Queryer|static
 	 * @static 
 	 */
 	 public static function take($value){
-		return Illuminate\Database\Query\Builder::take($value);
+		return Illuminate\Database\Queryer::take($value);
 	 }
 
 	/**
@@ -4259,65 +4259,65 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 *
 	 * @param int  $page
 	 * @param int  $perPage
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Illuminate\Database\Queryer|static
 	 * @static 
 	 */
 	 public static function forPage($page, $perPage = 15){
-		return Illuminate\Database\Query\Builder::forPage($page, $perPage);
+		return Illuminate\Database\Queryer::forPage($page, $perPage);
 	 }
 
 	/**
 	 * Add a union statement to the query.
 	 *
-	 * @param \Illuminate\Database\Query\Builder|\Closure  $query
+	 * @param \Illuminate\Database\Queryer|\Closure  $query
 	 * @param bool $all
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Illuminate\Database\Queryer|static
 	 * @static 
 	 */
 	 public static function union($query, $all = false){
-		return Illuminate\Database\Query\Builder::union($query, $all);
+		return Illuminate\Database\Queryer::union($query, $all);
 	 }
 
 	/**
 	 * Add a union all statement to the query.
 	 *
-	 * @param \Illuminate\Database\Query\Builder|\Closure  $query
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @param \Illuminate\Database\Queryer|\Closure  $query
+	 * @return \Illuminate\Database\Queryer|static
 	 * @static 
 	 */
 	 public static function unionAll($query){
-		return Illuminate\Database\Query\Builder::unionAll($query);
+		return Illuminate\Database\Queryer::unionAll($query);
 	 }
 
 	/**
 	 * Lock the selected rows in the table.
 	 *
 	 * @param bool  $update
-	 * @return \Illuminate\Database\Query\Builder
+	 * @return \Illuminate\Database\Queryer
 	 * @static 
 	 */
 	 public static function lock($value = true){
-		return Illuminate\Database\Query\Builder::lock($value);
+		return Illuminate\Database\Queryer::lock($value);
 	 }
 
 	/**
 	 * Lock the selected rows in the table for updating.
 	 *
-	 * @return \Illuminate\Database\Query\Builder
+	 * @return \Illuminate\Database\Queryer
 	 * @static 
 	 */
 	 public static function lockForUpdate(){
-		return Illuminate\Database\Query\Builder::lockForUpdate();
+		return Illuminate\Database\Queryer::lockForUpdate();
 	 }
 
 	/**
 	 * Share lock the selected rows in the table.
 	 *
-	 * @return \Illuminate\Database\Query\Builder
+	 * @return \Illuminate\Database\Queryer
 	 * @static 
 	 */
 	 public static function sharedLock(){
-		return Illuminate\Database\Query\Builder::sharedLock();
+		return Illuminate\Database\Queryer::sharedLock();
 	 }
 
 	/**
@@ -4327,7 +4327,7 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 * @static 
 	 */
 	 public static function toSql(){
-		return Illuminate\Database\Query\Builder::toSql();
+		return Illuminate\Database\Queryer::toSql();
 	 }
 
 	/**
@@ -4335,44 +4335,44 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 *
 	 * @param \DateTime|int  $minutes
 	 * @param string  $key
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Illuminate\Database\Queryer|static
 	 * @static 
 	 */
 	 public static function remember($minutes, $key = null){
-		return Illuminate\Database\Query\Builder::remember($minutes, $key);
+		return Illuminate\Database\Queryer::remember($minutes, $key);
 	 }
 
 	/**
 	 * Indicate that the query results should be cached forever.
 	 *
 	 * @param string  $key
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Illuminate\Database\Queryer|static
 	 * @static 
 	 */
 	 public static function rememberForever($key = null){
-		return Illuminate\Database\Query\Builder::rememberForever($key);
+		return Illuminate\Database\Queryer::rememberForever($key);
 	 }
 
 	/**
 	 * Indicate that the results, if cached, should use the given cache tags.
 	 *
 	 * @param array|dynamic  $cacheTags
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Illuminate\Database\Queryer|static
 	 * @static 
 	 */
 	 public static function cacheTags($cacheTags){
-		return Illuminate\Database\Query\Builder::cacheTags($cacheTags);
+		return Illuminate\Database\Queryer::cacheTags($cacheTags);
 	 }
 
 	/**
 	 * Indicate that the results, if cached, should use the given cache driver.
 	 *
 	 * @param string  $cacheDriver
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Illuminate\Database\Queryer|static
 	 * @static 
 	 */
 	 public static function cacheDriver($cacheDriver){
-		return Illuminate\Database\Query\Builder::cacheDriver($cacheDriver);
+		return Illuminate\Database\Queryer::cacheDriver($cacheDriver);
 	 }
 
 	/**
@@ -4383,7 +4383,7 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 * @static 
 	 */
 	 public static function getFresh($columns = array()){
-		return Illuminate\Database\Query\Builder::getFresh($columns);
+		return Illuminate\Database\Queryer::getFresh($columns);
 	 }
 
 	/**
@@ -4394,7 +4394,7 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 * @static 
 	 */
 	 public static function getCached($columns = array()){
-		return Illuminate\Database\Query\Builder::getCached($columns);
+		return Illuminate\Database\Queryer::getCached($columns);
 	 }
 
 	/**
@@ -4404,7 +4404,7 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 * @static 
 	 */
 	 public static function getCacheKey(){
-		return Illuminate\Database\Query\Builder::getCacheKey();
+		return Illuminate\Database\Queryer::getCacheKey();
 	 }
 
 	/**
@@ -4414,7 +4414,7 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 * @static 
 	 */
 	 public static function generateCacheKey(){
-		return Illuminate\Database\Query\Builder::generateCacheKey();
+		return Illuminate\Database\Queryer::generateCacheKey();
 	 }
 
 	/**
@@ -4426,7 +4426,7 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 * @static 
 	 */
 	 public static function implode($column, $glue = null){
-		return Illuminate\Database\Query\Builder::implode($column, $glue);
+		return Illuminate\Database\Queryer::implode($column, $glue);
 	 }
 
 	/**
@@ -4439,7 +4439,7 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 * @static 
 	 */
 	 public static function buildRawPaginator($paginator, $results, $perPage){
-		return Illuminate\Database\Query\Builder::buildRawPaginator($paginator, $results, $perPage);
+		return Illuminate\Database\Queryer::buildRawPaginator($paginator, $results, $perPage);
 	 }
 
 	/**
@@ -4449,7 +4449,7 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 * @static 
 	 */
 	 public static function getPaginationCount(){
-		return Illuminate\Database\Query\Builder::getPaginationCount();
+		return Illuminate\Database\Queryer::getPaginationCount();
 	 }
 
 	/**
@@ -4459,7 +4459,7 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 * @static 
 	 */
 	 public static function exists(){
-		return Illuminate\Database\Query\Builder::exists();
+		return Illuminate\Database\Queryer::exists();
 	 }
 
 	/**
@@ -4470,7 +4470,7 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 * @static 
 	 */
 	 public static function count($column = '*'){
-		return Illuminate\Database\Query\Builder::count($column);
+		return Illuminate\Database\Queryer::count($column);
 	 }
 
 	/**
@@ -4481,7 +4481,7 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 * @static 
 	 */
 	 public static function min($column){
-		return Illuminate\Database\Query\Builder::min($column);
+		return Illuminate\Database\Queryer::min($column);
 	 }
 
 	/**
@@ -4492,7 +4492,7 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 * @static 
 	 */
 	 public static function max($column){
-		return Illuminate\Database\Query\Builder::max($column);
+		return Illuminate\Database\Queryer::max($column);
 	 }
 
 	/**
@@ -4503,7 +4503,7 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 * @static 
 	 */
 	 public static function sum($column){
-		return Illuminate\Database\Query\Builder::sum($column);
+		return Illuminate\Database\Queryer::sum($column);
 	 }
 
 	/**
@@ -4514,7 +4514,7 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 * @static 
 	 */
 	 public static function avg($column){
-		return Illuminate\Database\Query\Builder::avg($column);
+		return Illuminate\Database\Queryer::avg($column);
 	 }
 
 	/**
@@ -4526,7 +4526,7 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 * @static 
 	 */
 	 public static function aggregate($function, $columns = array()){
-		return Illuminate\Database\Query\Builder::aggregate($function, $columns);
+		return Illuminate\Database\Queryer::aggregate($function, $columns);
 	 }
 
 	/**
@@ -4537,7 +4537,7 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 * @static 
 	 */
 	 public static function insert($values){
-		return Illuminate\Database\Query\Builder::insert($values);
+		return Illuminate\Database\Queryer::insert($values);
 	 }
 
 	/**
@@ -4549,7 +4549,7 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 * @static 
 	 */
 	 public static function insertGetId($values, $sequence = null){
-		return Illuminate\Database\Query\Builder::insertGetId($values, $sequence);
+		return Illuminate\Database\Queryer::insertGetId($values, $sequence);
 	 }
 
 	/**
@@ -4559,7 +4559,7 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 * @static 
 	 */
 	 public static function truncate(){
-		 Illuminate\Database\Query\Builder::truncate();
+		 Illuminate\Database\Queryer::truncate();
 	 }
 
 	/**
@@ -4571,7 +4571,7 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 * @static 
 	 */
 	 public static function mergeWheres($wheres, $bindings){
-		 Illuminate\Database\Query\Builder::mergeWheres($wheres, $bindings);
+		 Illuminate\Database\Queryer::mergeWheres($wheres, $bindings);
 	 }
 
 	/**
@@ -4582,7 +4582,7 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 * @static 
 	 */
 	 public static function raw($value){
-		return Illuminate\Database\Query\Builder::raw($value);
+		return Illuminate\Database\Queryer::raw($value);
 	 }
 
 	/**
@@ -4592,40 +4592,40 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 * @static 
 	 */
 	 public static function getBindings(){
-		return Illuminate\Database\Query\Builder::getBindings();
+		return Illuminate\Database\Queryer::getBindings();
 	 }
 
 	/**
 	 * Set the bindings on the query builder.
 	 *
 	 * @param array  $bindings
-	 * @return \Illuminate\Database\Query\Builder
+	 * @return \Illuminate\Database\Queryer
 	 * @static 
 	 */
 	 public static function setBindings($bindings){
-		return Illuminate\Database\Query\Builder::setBindings($bindings);
+		return Illuminate\Database\Queryer::setBindings($bindings);
 	 }
 
 	/**
 	 * Add a binding to the query.
 	 *
 	 * @param mixed  $value
-	 * @return \Illuminate\Database\Query\Builder
+	 * @return \Illuminate\Database\Queryer
 	 * @static 
 	 */
 	 public static function addBinding($value){
-		return Illuminate\Database\Query\Builder::addBinding($value);
+		return Illuminate\Database\Queryer::addBinding($value);
 	 }
 
 	/**
 	 * Merge an array of bindings into our bindings.
 	 *
-	 * @param \Illuminate\Database\Query\Builder  $query
-	 * @return \Illuminate\Database\Query\Builder
+	 * @param \Illuminate\Database\Queryer  $query
+	 * @return \Illuminate\Database\Queryer
 	 * @static 
 	 */
 	 public static function mergeBindings($query){
-		return Illuminate\Database\Query\Builder::mergeBindings($query);
+		return Illuminate\Database\Queryer::mergeBindings($query);
 	 }
 
 	/**
@@ -4635,7 +4635,7 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 * @static 
 	 */
 	 public static function getProcessor(){
-		return Illuminate\Database\Query\Builder::getProcessor();
+		return Illuminate\Database\Queryer::getProcessor();
 	 }
 
 	/**
@@ -4645,7 +4645,7 @@ class Eloquent extends Illuminate\Database\Eloquent\Model{
 	 * @static 
 	 */
 	 public static function getGrammar(){
-		return Illuminate\Database\Query\Builder::getGrammar();
+		return Illuminate\Database\Queryer::getGrammar();
 	 }
 
 }
@@ -10319,7 +10319,7 @@ class Schema extends Illuminate\Support\Facades\Schema{
 	 * @static 
 	 */
 	 public static function __construct($connection){
-		//Method inherited from Illuminate\Database\Schema\Builder
+		//Method inherited from Illuminate\Database\Schemaer
 		 Illuminate\Database\Schema\MySqlBuilder::__construct($connection);
 	 }
 
@@ -10332,7 +10332,7 @@ class Schema extends Illuminate\Support\Facades\Schema{
 	 * @static 
 	 */
 	 public static function hasColumn($table, $column){
-		//Method inherited from Illuminate\Database\Schema\Builder
+		//Method inherited from Illuminate\Database\Schemaer
 		return Illuminate\Database\Schema\MySqlBuilder::hasColumn($table, $column);
 	 }
 
@@ -10345,7 +10345,7 @@ class Schema extends Illuminate\Support\Facades\Schema{
 	 * @static 
 	 */
 	 public static function table($table, $callback){
-		//Method inherited from Illuminate\Database\Schema\Builder
+		//Method inherited from Illuminate\Database\Schemaer
 		return Illuminate\Database\Schema\MySqlBuilder::table($table, $callback);
 	 }
 
@@ -10358,7 +10358,7 @@ class Schema extends Illuminate\Support\Facades\Schema{
 	 * @static 
 	 */
 	 public static function create($table, $callback){
-		//Method inherited from Illuminate\Database\Schema\Builder
+		//Method inherited from Illuminate\Database\Schemaer
 		return Illuminate\Database\Schema\MySqlBuilder::create($table, $callback);
 	 }
 
@@ -10370,7 +10370,7 @@ class Schema extends Illuminate\Support\Facades\Schema{
 	 * @static 
 	 */
 	 public static function drop($table){
-		//Method inherited from Illuminate\Database\Schema\Builder
+		//Method inherited from Illuminate\Database\Schemaer
 		return Illuminate\Database\Schema\MySqlBuilder::drop($table);
 	 }
 
@@ -10382,7 +10382,7 @@ class Schema extends Illuminate\Support\Facades\Schema{
 	 * @static 
 	 */
 	 public static function dropIfExists($table){
-		//Method inherited from Illuminate\Database\Schema\Builder
+		//Method inherited from Illuminate\Database\Schemaer
 		return Illuminate\Database\Schema\MySqlBuilder::dropIfExists($table);
 	 }
 
@@ -10395,7 +10395,7 @@ class Schema extends Illuminate\Support\Facades\Schema{
 	 * @static 
 	 */
 	 public static function rename($from, $to){
-		//Method inherited from Illuminate\Database\Schema\Builder
+		//Method inherited from Illuminate\Database\Schemaer
 		return Illuminate\Database\Schema\MySqlBuilder::rename($from, $to);
 	 }
 
@@ -10406,7 +10406,7 @@ class Schema extends Illuminate\Support\Facades\Schema{
 	 * @static 
 	 */
 	 public static function getConnection(){
-		//Method inherited from Illuminate\Database\Schema\Builder
+		//Method inherited from Illuminate\Database\Schemaer
 		return Illuminate\Database\Schema\MySqlBuilder::getConnection();
 	 }
 
@@ -10414,11 +10414,11 @@ class Schema extends Illuminate\Support\Facades\Schema{
 	 * Set the database connection instance.
 	 *
 	 * @param \Illuminate\Database\Connection
-	 * @return \Illuminate\Database\Schema\Builder
+	 * @return \Illuminate\Database\Schemaer
 	 * @static 
 	 */
 	 public static function setConnection($connection){
-		//Method inherited from Illuminate\Database\Schema\Builder
+		//Method inherited from Illuminate\Database\Schemaer
 		return Illuminate\Database\Schema\MySqlBuilder::setConnection($connection);
 	 }
 
@@ -10430,7 +10430,7 @@ class Schema extends Illuminate\Support\Facades\Schema{
 	 * @static 
 	 */
 	 public static function blueprintResolver($resolver){
-		//Method inherited from Illuminate\Database\Schema\Builder
+		//Method inherited from Illuminate\Database\Schemaer
 		 Illuminate\Database\Schema\MySqlBuilder::blueprintResolver($resolver);
 	 }
 
