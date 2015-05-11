@@ -1,28 +1,40 @@
 <?php namespace Deployer\Task;
 
-use \Deployer\Entity;
-use \Deployer\Entity\Account;
-use \Deployer\Entity\Database;
-use \Deployer\Entity\Dir;
-use \Deployer\Task;
+use Deployer\Entity;
+use Deployer\Entity\Account;
+use Deployer\Entity\Database;
+use Deployer\Entity\Dir;
+use Deployer\Service\Logger;
+use Deployer\Task;
 
 /**
  * Performs task related to the command line interface
  */
 class CliTask extends Task
 {
+	/**  @var $viewTask \Deployer\Service\Logger */
+	protected $logger;
+
+	/**
+	 * Constructor
+	 */
+	public function __construct(Logger $logger)
+	{
+		$this->logger = $logger;
+	}
+
 	/**
 	 * Prompt the user for an account password
 	 * @param Account $account
 	 * @param bool $forcePrompt
 	 */
-	public static function promptAccountPassword(Account $account, $forcePrompt = FALSE)
+	public function promptAccountPassword(Account $account, $forcePrompt = FALSE)
 	{
 		// Prompt for all necessary passwords
 		if (empty($account->password) || $forcePrompt) {
-			self::log('Enter password for user ' . $account->username . ': ');
-			$account->password = self::readStdin();
-			self::log("\n");
+			$this->logger->log('Enter password for user ' . $account->username . ': ');
+			$account->password = $this->readStdin();
+			$this->logger->log("\n");
 		}
 	}
 
@@ -32,7 +44,7 @@ class CliTask extends Task
 	 * @param string $promptText
 	 * @return \Deployer\Entity\Database
 	 */
-	public static function promptDatabase($databases = NULL, $promptText = 'Choose a database:')
+	public function promptDatabase($databases = NULL, $promptText = 'Choose a database:')
 	{
 		$choices = array();
 		if (empty($databases)) {
@@ -52,7 +64,7 @@ class CliTask extends Task
 	 * Ask he user if they want to quit the script immediately
 	 * @param string $promptMessage
 	 */
-	public static function promptQuit($promptMessage = '')
+	public function promptQuit($promptMessage = '')
 	{
 		if (empty($promptMessage)) {
 			$promptMessage = 'Press y to continue or n to quit [y/n]: ';
@@ -60,15 +72,15 @@ class CliTask extends Task
 
 		$input  = '';
 		while ($input !== 'y' && $input !== 'n') {
-			self::log( "\n" . $promptMessage );
-			$input = self::readStdin();
-			self::writeLog($input . "\n");
+			$this->logger->log( "\n" . $promptMessage );
+			$input = $this->logger->readStdin();
+			$this->logger->writeLog($input . "\n");
 		}
 
-		self::log("\n");
+		$this->logger->log("\n");
 
 		if ($input === 'n') {
-			self::log("Exiting immediately\n");
+			$this->logger->log("Exiting immediately\n");
 			exit();
 		}
 	}
@@ -79,7 +91,7 @@ class CliTask extends Task
 	 * @param string $customPromptText
 	 * @return int
 	 */
-	public static function promptMultipleChoice(array $choices, $customPromptText = "")
+	public function promptMultipleChoice(array $choices, $customPromptText = "")
 	{
 		if (empty($customPromptText)) {
 			$customPromptText = "Please choose one of the following:\n";
@@ -99,22 +111,22 @@ class CliTask extends Task
 
 		while(TRUE) {
 			$result = 0;
-			self::log($customPromptText);
+			$this->logger->log($customPromptText);
 			$counter = 1;
 			if ($choiceCnt < 1) {
-				self::log("No choices available\n");
+				$this->logger->log("No choices available\n");
 			}
 			foreach($choices as $i => $choice) {
-				self::log("\t[{$counter}] {$choice}\n");
+				$this->logger->log("\t[{$counter}] {$choice}\n");
 				$counter++;
 			}
 
-			self::log("Choice [{$choiceText}e(x)it]: ");
-			$result = trim(self::readStdin());
+			$this->logger->log("Choice [{$choiceText}e(x)it]: ");
+			$result = trim($this->logger->readStdin());
 
-			self::log("\n");
+			$this->logger->log("\n");
 			if ($result === 'x') {
-				self::log("Exiting immediately\n");
+				$this->logger->log("Exiting immediately\n");
 				exit;
 			}
 			else if (ctype_digit($result) && $result > 0 && $result <= $choiceCnt) {
@@ -129,7 +141,7 @@ class CliTask extends Task
 	 * @param string $promptText
 	 * @return \Deployer\Entity\Dir
 	 */
-	public static function promptLocalSyncDir($promptText = 'Choose a local directory to sync from:')
+	public function promptLocalSyncDir($promptText = 'Choose a local directory to sync from:')
 	{
 		$choices = array();
 		$dirs = Entity::getList('Dir');
@@ -150,7 +162,7 @@ class CliTask extends Task
 	 * @param string $promptText
 	 * @return \Deployer\Entity\WorkingCopy
 	 */
-	public static function promptRepo($promptText = 'Choose a repository to sync:')
+	public function promptRepo($promptText = 'Choose a repository to sync:')
 	{
 		$choices = array();
 		$workingCopies = Entity::getList('WorkingCopy');
@@ -170,7 +182,7 @@ class CliTask extends Task
 	 * @param string $promptText
 	 * @return mixed
 	 */
-	public static function promptDir(array $dirs, $promptText = 'Choose a remote directory:')
+	public function promptDir(array $dirs, $promptText = 'Choose a remote directory:')
 	{
 		$choices = array();
 		if (empty($dirs)) {
@@ -194,7 +206,7 @@ class CliTask extends Task
 	 * @param string $promptText
 	 * @return mixed
 	 */
-	public static function promptRemoteDir($hostFilter = NULL, $promptText = 'Choose a remote directory:')
+	public function promptRemoteDir($hostFilter = NULL, $promptText = 'Choose a remote directory:')
 	{
 		$choices = array();
 		$dirs = Entity::getList('Dir');
@@ -216,7 +228,7 @@ class CliTask extends Task
 	 * @param string $promptText
 	 * @return Entity\Host
 	 */
-	public static function promptHost(array $hosts = NULL, $promptText = 'Choose a host:')
+	public function promptHost(array $hosts = NULL, $promptText = 'Choose a host:')
 	{
 		$choices = array();
 		if (empty($hosts)) {
@@ -239,7 +251,7 @@ class CliTask extends Task
 	 * @param string $promptText
 	 * @return mixed
 	 */
-	public static function promptWorkingCopy($promptText = 'Choose a working copy:')
+	public function promptWorkingCopy($promptText = 'Choose a working copy:')
 	{
 		$choices = array();
 		$workingCopies = Entity::getList('WorkingCopy');
@@ -255,7 +267,7 @@ class CliTask extends Task
 	 * Read characters from STDIN until enter is pressed
 	 * @return string
 	 */
-	public static function readStdin()
+	public function readStdin()
 	{
 		$fr = fopen("php://stdin","r");
 		do {
