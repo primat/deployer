@@ -6,10 +6,10 @@
 class Entity
 {
 	/** @var \Deployer\Entity[][] $pool Stores all initialized entities */
-	public static $pool = array();
+	protected static $pool = array();
 
 	/**
-	 * Constructor
+	 * Constructor - Stores all entities in the $pool, separated by type
 	 */
 	public function __construct()
 	{
@@ -18,7 +18,7 @@ class Entity
 	}
 
 	/**
-	 * Destructor
+	 * Destructor - when an entity is destroyed, remove it from the $pool
 	 */
 	public function __destruct()
 	{

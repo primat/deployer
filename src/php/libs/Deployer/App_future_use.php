@@ -8,7 +8,7 @@ use \Deployer\Exception;
  * request/command correct controller.
  */
 
-class App
+class App_future_use
 {
 	/** @var int $startTime The time that the build script started running */
 	private static $startTime = 0;
