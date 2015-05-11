@@ -9,7 +9,7 @@
  * Class Project
  * @package Deployer
  */
-class Project
+class Project extends DeployerProject
 {
 	protected $projectFolder = '';
 
