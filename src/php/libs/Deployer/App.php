@@ -12,8 +12,10 @@ use Pimple\Container;
 class App
 {
 	/** @var int $startTime The time that the build script started running */
-	protected $startTime = 0;
+	//protected $startTime = 0;
 
+
+    protected $container;
 
 	/**
 	 * Initialize the build app
@@ -24,15 +26,6 @@ class App
 		//$this->startTime = time();
 
 
-		$container = new Container();
-
-		$container['logger'] = function ($c) {
-			return new Logger();
-		};
-
-		$container['cliTask'] = function ($c) {
-			return new CliTask($c['logger']);
-		};
 
 //		$container['emailTask'];
 //		$container['fileSyncTask'];
@@ -162,10 +155,26 @@ class App
 //	}
 
 
-
+    /**
+     * @param DeployerProject $project
+     */
 	public function registerProject(DeployerProject $project)
 	{
-		echo get_class($project);
+		//echo get_class($project);
+
+        $this->container = new Container();
+
+        $container['project'] = $project;
+
+        $container['logger'] = function ($c) {
+            return new Logger();
+        };
+
+        $container['cliTask'] = function ($c) {
+            return new CliTask($c['logger']);
+        };
+
+
 	}
 
 	public function runScript($className, $methodName)
