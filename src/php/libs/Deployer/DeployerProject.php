@@ -5,7 +5,7 @@
  * Date: 11/05/15
  */
 
-use Pimple\CoDeployer\ntainer;
+use Pimple\Container;
 
 /**
  * Class DeployerProject
