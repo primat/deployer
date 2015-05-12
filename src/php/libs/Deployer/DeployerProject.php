@@ -1,116 +1,59 @@
-<?php namespace Deployer;
+<?php namespace Primat\Deployer;
 /**
  * Project: Deployer
  * User: mprice
  * Date: 11/05/15
  */
 
-use Pimple\Container;
+use Pimple\CoDeployer\ntainer;
 
 /**
  * Class DeployerProject
- * @package Deployer\Utils
+ * @package Primat\Deployer\Utils
  */
 class DeployerProject
 {
-	/**  @var $cliTask \Deployer\Task\CliTask */
+	const DIR_LOGS = '/logs';
+	const DIR_TEMP = '/temp';
+	const DIR_WC = '/workingCopies';
+
+	/**  @var $cliTask \Primat\Deployer\Task\CliTask */
 	protected $cliTask;
-	/**  @var $emailTask \Deployer\Task\EmailTask */
+	/**  @var $emailTask \Primat\Deployer\Task\EmailTask */
 	protected $emailTask;
-	/**  @var $fileSyncTask \Deployer\Task\FileSyncTask */
+	/**  @var $fileSyncTask \Primat\Deployer\Task\FileSyncTask */
 	protected $fileSyncTask;
-	/**  @var $fileSystemTask \Deployer\Task\FileSystemTask */
+	/**  @var $fileSystemTask \Primat\Deployer\Task\FileSystemTask */
 	protected $fileSystemTask;
-	/**  @var $mysqlTask \Deployer\Task\MysqlTask */
+	/**  @var $mysqlTask \Primat\Deployer\Task\MysqlTask */
 	protected $mysqlTask;
-	/**  @var $sftpTask \Deployer\Task\SftpTask */
+	/**  @var $sftpTask \Primat\Deployer\Task\SftpTask */
 	protected $sftpTask;
-	/**  @var $sqliteTask \Deployer\Task\SqliteTask */
+	/**  @var $sqliteTask \Primat\Deployer\Task\SqliteTask */
 	protected $sqliteTask;
-	/**  @var $sshTask \Deployer\Task\SshTask */
+	/**  @var $sshTask \Primat\Deployer\Task\SshTask */
 	protected $sshTask;
-	/**  @var $svnTask \Deployer\Task\SvnTask */
+	/**  @var $svnTask \Primat\Deployer\Task\SvnTask */
 	protected $svnTask;
-	/**  @var $timerTask \Deployer\Task\TimerTask */
+	/**  @var $timerTask \Primat\Deployer\Task\TimerTask */
 	protected $timerTask;
-	/**  @var $viewTask \Deployer\Task\ViewTask */
+	/**  @var $viewTask \Primat\Deployer\Task\ViewTask */
 	protected $viewTask;
 
-	/**  @var $viewTask \Deployer\Service\Logger */
+	/**  @var $viewTask \Primat\Deployer\Service\Logger */
 	protected $logger;
 
-	/**  @var $viewTask \Deployer\Service\Logger */
+	/**  @var $viewTask \Primat\Deployer\Service\Logger */
 	//protected $logger;
 
-
-	protected $projectFolder = '';
+	/**  @var $projectFolder string */
+	protected $projectFolder = __DIR__;
+	/**  @var $tempFolder string */
 	protected $tempFolder = '';
-	protected $logfile = '';
+	/**  @var $logsFolder string */
+	protected $logsFolder = '';
+	/**  @var $workingCopiesFolder string */
 	protected $workingCopiesFolder = '';
-
-	/**
-	 * @param string $logFolder
-	 */
-	public function setLogFolder($logFolder)
-	{
-		$this->logFolder = $logFolder;
-	}
-
-	/**
-	 * @return string
-	 */
-	public function getLogFolder()
-	{
-		return $this->logFolder;
-	}
-
-	/**
-	 * @param \Deployer\Service\Logger $projectFolder
-	 */
-	public function setProjectFolder($projectFolder)
-	{
-		$this->projectFolder = $projectFolder;
-	}
-
-	/**
-	 * @return \Deployer\Service\Logger
-	 */
-	public function getProjectFolder()
-	{
-		return $this->projectFolder;
-	}
-
-	/**
-	 * @param string $wcCacheFolder
-	 */
-	public function setWcCacheFolder($wcCacheFolder)
-	{
-		$this->wcCacheFolder = $wcCacheFolder;
-	}
-
-	/**
-	 * @return string
-	 */
-	public function getWcCacheFolder()
-	{
-		return $this->wcCacheFolder;
-	}
-
-	/**
-	 * @param string $workingCopiesFolder
-	 */
-	public function setWorkingCopiesFolder($workingCopiesFolder)
-	{
-		$this->workingCopiesFolder = $workingCopiesFolder;
-	}
-
-	/**
-	 * @return string
-	 */
-	public function getWorkingCopiesFolder()
-	{
-		return $this->workingCopiesFolder;
-	}
 
 
 
@@ -122,9 +65,9 @@ class DeployerProject
 	 */
 	public function __construct($projectFolder, $tempFolder)
 	{
-		$this->tempFolder = $tempFolder . '/temp';
-		$this->logFolder = $this->tempFolder . '/logs';
-		$this->wcCacheFolder = $this->tempFolder . '/workingCopies';
+//		$this->tempFolder = $tempFolder . '/temp';
+//		$this->logFolder = $this->tempFolder . '/logs';
+//		$this->wcCacheFolder = $this->tempFolder . '/workingCopies';
 	}
 
 	public function registerTasks(Container $diContainer)
@@ -142,4 +85,80 @@ class DeployerProject
 		$this->viewTask = $diContainer['viewTask'];
 	}
 
+	//
+	// Getters and Setters
+	//
+
+	/**
+	 * @param string $logsFolder
+	 */
+	public function setLogsFolder($logsFolder)
+	{
+		$this->logsFolder = $logsFolder;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getLogsFolder()
+	{
+		if (empty($this->logsFolder)) {
+			return $this->projectFolder . self::DIR_LOGS;
+		}
+		return $this->logsFolder;
+	}
+
+	/**
+	 * @param string $projectFolder
+	 */
+	public function setProjectFolder($projectFolder)
+	{
+		$this->projectFolder = $projectFolder;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getProjectFolder()
+	{
+		return $this->projectFolder;
+	}
+
+	/**
+	 * @param string $tempFolder
+	 */
+	public function setTempFolder($tempFolder)
+	{
+		$this->tempFolder = $tempFolder;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getTempFolder()
+	{
+		if (empty($this->tempFolder)) {
+			return $this->projectFolder . self::DIR_TEMP;
+		}
+		return $this->tempFolder;
+	}
+
+	/**
+	 * @param string $workingCopiesFolder
+	 */
+	public function setWorkingCopiesFolder($workingCopiesFolder)
+	{
+		$this->workingCopiesFolder = $workingCopiesFolder;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getWorkingCopiesFolder()
+	{
+		if (empty($this->workingCopiesFolder)) {
+			return $this->projectFolder . self::DIR_WC;
+		}
+		return $this->workingCopiesFolder;
+	}
 }

@@ -1,12 +1,12 @@
-<?php namespace Deployer\Entity;
+<?php namespace Primat\Deployer\Entity;
 
-use Deployer\Entity;
+use Primat\Deployer\Entity;
 /**
  *
  */
 class Host extends Entity
 {
-	/** @var \Deployer\Entity\Account $account */
+	/** @var \Primat\Deployer\Entity\Account $account */
 	public $account;
 	/** @var string $hostname */
 	public $hostname;
@@ -45,7 +45,7 @@ class Host extends Entity
 	}
 
 	/**
-	 * @param \Deployer\Entity\Account $account
+	 * @param \Primat\Deployer\Entity\Account $account
 	 */
 	public function setAccount($account)
 	{
@@ -53,7 +53,7 @@ class Host extends Entity
 	}
 
 	/**
-	 * @return \Deployer\Entity\Account
+	 * @return \Primat\Deployer\Entity\Account
 	 */
 	public function getAccount()
 	{

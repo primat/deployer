@@ -1,11 +1,11 @@
-<?php namespace Deployer\Task;
+<?php namespace Primat\Deployer\Task;
 
-use Deployer\Exception;
+use Primat\Deployer\Exception;
 
 /**
  *
  */
-class FileSystemTask extends \Deployer\Task
+class FileSystemTask extends \Primat\Deployer\Task
 {
 	/**
 	 * Recursively iterate through a directory and delete all files and folders
@@ -37,7 +37,7 @@ class FileSystemTask extends \Deployer\Task
 	/**
 	 * @param $path
 	 * @return bool
-	 * @throws \Deployer\Exception
+	 * @throws \Primat\Deployer\Exception
 	 */
 	public static function mkdir($path)
     {

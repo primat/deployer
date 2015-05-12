@@ -1,13 +1,13 @@
-<?php namespace Deployer\Task;
+<?php namespace Primat\Deployer\Task;
 
-use \Deployer\Entity\WorkingCopy;
-use \Deployer\Entity\Account;
-use \Deployer\Entity\Node;
-use \Deployer\Entity\File;
-use \Deployer\Entity\Database;
-use \Deployer\Exception;
-use \Deployer\Config;
-use \Deployer\Task;
+use \Primat\Deployer\Entity\WorkingCopy;
+use \Primat\Deployer\Entity\Account;
+use \Primat\Deployer\Entity\Node;
+use \Primat\Deployer\Entity\File;
+use \Primat\Deployer\Entity\Database;
+use \Primat\Deployer\Exception;
+use \Primat\Deployer\Config;
+use \Primat\Deployer\Task;
 
 /**
  *
@@ -15,11 +15,11 @@ use \Deployer\Task;
 class MysqlTask extends Task
 {
 	/**
-	 * @param \Deployer\Entity\Database $db
-	 * @param \Deployer\Entity\File $dumpFile
+	 * @param \Primat\Deployer\Entity\Database $db
+	 * @param \Primat\Deployer\Entity\File $dumpFile
 	 * @param $dbName
 	 * @param array $tables
-	 * @throws \Deployer\Exception
+	 * @throws \Primat\Deployer\Exception
 	 */
 	public static function mysqlDump(Database $db, $dbName, array $tables = array(), File $dumpFile)
 	{
@@ -58,10 +58,10 @@ class MysqlTask extends Task
 	}
 
 	/**
-	 * @param \Deployer\Entity\Database $db
+	 * @param \Primat\Deployer\Entity\Database $db
 	 * @param $dumpFilePath
 	 * @param $dbName
-	 * @throws \Deployer\Exception
+	 * @throws \Primat\Deployer\Exception
 	 */
 	public static function importDump(Database $db, $dumpFilePath, $dbName)
 	{
@@ -77,7 +77,7 @@ class MysqlTask extends Task
 	}
 
 	/**
-	 * @param \Deployer\Entity\Database $db
+	 * @param \Primat\Deployer\Entity\Database $db
 	 * @param $dumpFilePath
 	 * @param $dbName
 	 * @param $options

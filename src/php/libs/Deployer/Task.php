@@ -1,8 +1,8 @@
-<?php namespace Deployer;
+<?php namespace Primat\Deployer;
 
-use \Deployer\App;
-use \Deployer\Exception\CommandException;
-use \Deployer\Exception\ExitStatusException;
+use \Primat\Deployer\App;
+use \Primat\Deployer\Exception\CommandException;
+use \Primat\Deployer\Exception\ExitStatusException;
 
 /**
  * A parent class for all tasks

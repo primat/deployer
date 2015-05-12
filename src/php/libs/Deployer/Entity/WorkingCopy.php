@@ -1,26 +1,27 @@
-<?php namespace Deployer\Entity;
+<?php namespace Primat\Deployer\Entity;
 
-use \Deployer\Exception;
+use Primat\Deployer\Entity;
+use Primat\Deployer\Exception;
 
 /**
  *
  */
-class WorkingCopy extends \Deployer\Entity
+class WorkingCopy extends Entity
 {
 	/** @var Account $account */
 	public $account;
 	/** @var Dir $dir */
 	public $dir;
 	/** @var string $id */
-	public $id;
+	//public $id;
 	/** @var string $repoBaseUri */
-	protected $repoBaseUri;
+	public $repoBaseUri;
 	/** @var string $repoBaseUrl */
 	public $repoBaseUrl;
 	/** @var string $repoPath */
 	public $repoPath;
 	/** @var string $repoUrl */
-	public $repoUrl;
+	//public $repoUrl;
 	/** @var SvnInfo $info */
 	public $info = NULL;
 	/** @var SvnExternal[] $externals */
@@ -28,22 +29,35 @@ class WorkingCopy extends \Deployer\Entity
 
 
 	/**
-	 * @param $id
+	 * @param $workingCopyFolder
 	 * @param $baseUrl
 	 * @param $baseUri
 	 * @param Account $account
 	 */
-	public function __construct($id, $baseUrl, $baseUri, Account $account)
+	public function __construct($workingCopyFolder, $baseUrl, $baseUri, Account $account)
 	{
 		parent::__construct();
-
-		// Set params
-		$this->id = $id;
-		$this->dir = new Dir(BUILD_WORKING_COPY_DIR . "/{$this->id}/");
 		$this->repoBaseUri = rtrim($baseUri, '/');
 		$this->repoBaseUrl = rtrim($baseUrl, '/');
-		$this->repoUrl = $this->repoBaseUrl . $this->repoBaseUri;
+		$this->dir = new Dir($workingCopyFolder . '/' . self::dirify($this->getRepoUrl()));
 		$this->account = $account;
+	}
+
+	/**
+	 * @param $text
+	 * @return string
+	 */
+	public static function dirify($text)
+	{
+		if (empty($text)) {
+			return (string) $text;
+		}
+		$text = preg_replace('~[^\\pL\d]+~u', '-', $text); // Replace non letter or digits by -
+		$text = trim($text, '-');
+		$text = iconv('utf-8', 'us-ascii//TRANSLIT', $text);
+		$text = strtolower($text);
+		$text = preg_replace('~[^-\w]+~', '', $text); // Remove unwanted characters
+		return $text;
 	}
 
 	/**

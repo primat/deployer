@@ -1,4 +1,4 @@
-<?php namespace Deployer\Utils;
+<?php namespace Primat\Deployer\Utils;
 
 /**
  * A class for Cygwin related functionality

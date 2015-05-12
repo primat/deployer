@@ -1,4 +1,4 @@
-<?php namespace Deployer\Service;
+<?php namespace Primat\Deployer\Service;
 /**
  * Project: Deployer
  * User: mprice
@@ -6,12 +6,12 @@
  */
 /**
  * Class Logger
- * @package Deployer\Service
+ * @package Primat\Deployer\Service
  */
 
-use \Deployer\Exception\CommandException;
-use \Deployer\Exception\LoggerException;
-use \Deployer\Exception\ExitStatusException;
+use \Primat\Deployer\Exception\CommandException;
+use \Primat\Deployer\Exception\LoggerException;
+use \Primat\Deployer\Exception\ExitStatusException;
 
 class Logger
 {

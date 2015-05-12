@@ -1,4 +1,4 @@
-<?php namespace Deployer\Entity\Email;
+<?php namespace Primat\Deployer\Entity\Email;
 
 /**
  * An email connector class used to indicate how to send emails (e.g. smtp, sendmail or PHP's mail() function).

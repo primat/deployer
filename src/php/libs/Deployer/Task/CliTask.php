@@ -1,18 +1,18 @@
-<?php namespace Deployer\Task;
+<?php namespace Primat\Deployer\Task;
 
-use Deployer\Entity;
-use Deployer\Entity\Account;
-use Deployer\Entity\Database;
-use Deployer\Entity\Dir;
-use Deployer\Service\Logger;
-use Deployer\Task;
+use Primat\Deployer\Entity;
+use Primat\Deployer\Entity\Account;
+use Primat\Deployer\Entity\Database;
+use Primat\Deployer\Entity\Dir;
+use Primat\Deployer\Service\Logger;
+use Primat\Deployer\Task;
 
 /**
  * Performs task related to the command line interface
  */
 class CliTask extends Task
 {
-	/**  @var $viewTask \Deployer\Service\Logger */
+	/**  @var $viewTask \Primat\Deployer\Service\Logger */
 	protected $logger;
 
 	/**
@@ -42,7 +42,7 @@ class CliTask extends Task
 	 * Prompt the user to select a database
 	 * @param Database[] $databases
 	 * @param string $promptText
-	 * @return \Deployer\Entity\Database
+	 * @return \Primat\Deployer\Entity\Database
 	 */
 	public function promptDatabase($databases = NULL, $promptText = 'Choose a database:')
 	{
@@ -52,7 +52,7 @@ class CliTask extends Task
 		}
 		$mapping = array();
 		foreach($databases as $index => $db) {
-			/** @var $db \Deployer\Entity\Database */
+			/** @var $db \Primat\Deployer\Entity\Database */
 			$mapping[] = $db;
 			$choices[] = $db->getDbName() . ' on ' . $db->getHost()->getHostname();
 		}
@@ -139,7 +139,7 @@ class CliTask extends Task
 	/**
 	 * Prompt the user to select a local directory to sync file from
 	 * @param string $promptText
-	 * @return \Deployer\Entity\Dir
+	 * @return \Primat\Deployer\Entity\Dir
 	 */
 	public function promptLocalSyncDir($promptText = 'Choose a local directory to sync from:')
 	{
@@ -147,7 +147,7 @@ class CliTask extends Task
 		$dirs = Entity::getList('Dir');
 		$mapping = array();
 		foreach($dirs as $index => $dir) {
-			/** @var $dir \Deployer\Entity\Dir */
+			/** @var $dir \Primat\Deployer\Entity\Dir */
 			if ($dir->host === NULL && is_dir($dir->path) && stripos($dir->path, BUILD_ROOT_DIR) === FALSE) {
 				$mapping[] = $dir;
 				$choices[] = $dir->path;
@@ -160,7 +160,7 @@ class CliTask extends Task
 	/**
 	 * Prompt the user to select a repository to sync
 	 * @param string $promptText
-	 * @return \Deployer\Entity\WorkingCopy
+	 * @return \Primat\Deployer\Entity\WorkingCopy
 	 */
 	public function promptRepo($promptText = 'Choose a repository to sync:')
 	{
@@ -168,7 +168,7 @@ class CliTask extends Task
 		$workingCopies = Entity::getList('WorkingCopy');
 		$mapping = array();
 		foreach($workingCopies as $index => $workingCopy) {
-			/** @var $workingCopy \Deployer\Entity\WorkingCopy */
+			/** @var $workingCopy \Primat\Deployer\Entity\WorkingCopy */
 				$mapping[] = $workingCopy;
 				$choices[] = $workingCopy->repoUrl;
 		}
@@ -189,7 +189,7 @@ class CliTask extends Task
 			$dirs = Entity::getList('Dir');
 		}
 		foreach($dirs as $index => $dir) {
-			/** @var $dir \Deployer\Entity\Dir */
+			/** @var $dir \Primat\Deployer\Entity\Dir */
 			$displayString = $dir->getPath();
 			if ($dir->getHost() !== NULL) {
 				$displayString .= ' on ' . $dir->getHost()->hostname;
@@ -212,7 +212,7 @@ class CliTask extends Task
 		$dirs = Entity::getList('Dir');
 		$mapping = array();
 		foreach($dirs as $index => $dir) {
-			/** @var $dir \Deployer\Entity\Dir */
+			/** @var $dir \Primat\Deployer\Entity\Dir */
 			if ($hostFilter === NULL || $dir->getHost() === $hostFilter) {
 				$mapping[] = $dir;
 				$choices[] = $dir->getPath();
@@ -235,7 +235,7 @@ class CliTask extends Task
 			$hosts = Entity::getList('Host');
 		}
 		foreach($hosts as $index => $host) {
-			/** @var $host \Deployer\Entity\Host */
+			/** @var $host \Primat\Deployer\Entity\Host */
 			$name = $host->hostname;
 			if (! empty($host->name)) {
 				$name .= ' - ' . $host->name;
@@ -256,7 +256,7 @@ class CliTask extends Task
 		$choices = array();
 		$workingCopies = Entity::getList('WorkingCopy');
 		foreach($workingCopies as $index => $wc) {
-			/** @var $wc \Deployer\Entity\WorkingCopy */
+			/** @var $wc \Primat\Deployer\Entity\WorkingCopy */
 			$choices[] = $wc->id;
 		}
 		$selection = CliTask::promptMultipleChoice($choices, $promptText);

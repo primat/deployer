@@ -1,4 +1,4 @@
-<?php namespace Deployer\Service;
+<?php namespace Primat\Deployer\Service;
 /**
  * Project: Deployer
  * User: mprice
@@ -6,7 +6,7 @@
  */
 /**
  * Class Config
- * @package Deployer\Service
+ * @package Primat\Deployer\Service
 */
 class Config
 {

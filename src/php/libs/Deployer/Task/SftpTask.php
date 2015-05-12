@@ -1,6 +1,6 @@
-<?php namespace Deployer\Task;
+<?php namespace Primat\Deployer\Task;
 
-use \Deployer\Task\SshTask;
+use \Primat\Deployer\Task\SshTask;
 
 /**
  * 

@@ -7,7 +7,7 @@
  * To change this template use File | Settings | File Templates.
  */
 
-namespace Deployer\Utils;
+namespace Primat\Deployer\Utils;
 
 class StringUtils
 {

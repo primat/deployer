@@ -1,7 +1,7 @@
-<?php namespace Deployer;
+<?php namespace Primat\Deployer;
 
-use \Deployer\Config;
-use \Deployer\Exception;
+use \Primat\Deployer\Config;
+use \Primat\Deployer\Exception;
 
 /**
  * App is the entry point to the build application. It's main purpose is to initialize the app and route the
@@ -31,7 +31,7 @@ class App_future_use
 		 * Register some important handlers
 		 */
 		spl_autoload_register(array('self', 'autoload'));
-		//set_exception_handler(array('\Deployer\Task', 'exceptionHandler'));
+		//set_exception_handler(array('\Primat\Deployer\Task', 'exceptionHandler'));
 
 		/*
 		 * Whether or not the script is running in the CLI as opposed to a request for a web page
@@ -104,7 +104,7 @@ class App_future_use
 		}
 
 		$controllers = array(
-			'user' => '\\Deployer\\\Controller\\Cli\\User'
+			'user' => '\\Primat\Deployer\\\Controller\\Cli\\User'
 		);
 
 		if (!isset($controllers[$controller])) {
@@ -113,7 +113,7 @@ class App_future_use
 
 		$c = new $controllers[$controller]();
 
-		/* @var \Deployer\Controller\Cli\User $c */
+		/* @var \Primat\Deployer\Controller\Cli\User $c */
 		if (!method_exists($c, $method)) {
 			throw new Exception(__METHOD__ . ": Unknown method $controllers[$controller]->$method()");
 		}
@@ -196,8 +196,8 @@ class App_future_use
 		 * Register some important handlers
 		 */
 		spl_autoload_register(array('self', 'autoload'));
-		set_exception_handler(array('\Deployer\Task', 'exceptionHandler'));
-		register_shutdown_function(array('\Deployer\Task', 'endOfScriptMaintenance'));
+		set_exception_handler(array('\Primat\Deployer\Task', 'exceptionHandler'));
+		register_shutdown_function(array('\Primat\Deployer\Task', 'endOfScriptMaintenance'));
 
 		/*
 		 * Load the default build configuration

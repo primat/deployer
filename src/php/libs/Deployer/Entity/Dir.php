@@ -1,7 +1,7 @@
-<?php namespace Deployer\Entity;
+<?php namespace Primat\Deployer\Entity;
 
-use \Deployer\Entity;
-use \Deployer\Entity\Host;
+use \Primat\Deployer\Entity;
+use \Primat\Deployer\Entity\Host;
 
 /**
  *

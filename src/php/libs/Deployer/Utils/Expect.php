@@ -1,11 +1,11 @@
-<?php namespace Deployer\Utils;
+<?php namespace Primat\Deployer\Utils;
 
-use \Deployer\Utils\Cygwin;
-use \Deployer\Config;
+use \Primat\Deployer\Utils\Cygwin;
+use \Primat\Deployer\Config;
 
 /**
  * Class Expect
- * @package Deployer\Utils
+ * @package Primat\Deployer\Utils
  */
 class Expect
 {

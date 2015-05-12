@@ -1,9 +1,9 @@
-<?php namespace Deployer\Exception;
+<?php namespace Primat\Deployer\Exception;
 
 /**
  *
  */
-class WorkingCopyException extends \Deployer\Exception
+class WorkingCopyException extends \Primat\Deployer\Exception
 {
 
 }

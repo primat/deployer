@@ -1,9 +1,9 @@
-<?php namespace Deployer\Exception;
+<?php namespace Primat\Deployer\Exception;
 
 /**
  *
  */
-class ExitStatusException extends \Deployer\Exception
+class ExitStatusException extends \Primat\Deployer\Exception
 {
 
 }

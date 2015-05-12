@@ -1,4 +1,4 @@
-<?php namespace Deployer\Entity\Email;
+<?php namespace Primat\Deployer\Entity\Email;
 
 /**
  *

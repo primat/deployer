@@ -1,22 +1,22 @@
-<?php namespace Deployer\Entity;
+<?php namespace Primat\Deployer\Entity;
 
-use \Deployer\Exception;
-use \Deployer\Entity\Account;
+use \Primat\Deployer\Exception;
+use \Primat\Deployer\Entity\Account;
 
 /**
  * The SubversionRepository class represents what it is named after, a SVN repository
  */
 class SubversionRepository
 {
-	/** @var \Deployer\Entity\Account $account */
+	/** @var \Primat\Deployer\Entity\Account $account */
 	public $account = NULL; // Accounts can also be set per branch/tag/trunk, etc
 	/** @var string $account */
 	public $baseUrl;
-	/** @var \Deployer\Entity\SubversionBranch[] $branches */
+	/** @var \Primat\Deployer\Entity\SubversionBranch[] $branches */
 	public $branches;
-	/** @var \Deployer\Entity\SubversionBranch[] $tags */
+	/** @var \Primat\Deployer\Entity\SubversionBranch[] $tags */
 	public $tags;
-	/** @var \Deployer\Entity\SubversionBranch $trunk */
+	/** @var \Primat\Deployer\Entity\SubversionBranch $trunk */
 	public $trunk;
 
 	/**
@@ -33,43 +33,43 @@ class SubversionRepository
 	/**
 	 * @param string $uri
 	 * @param string $alias
-	 * @param \Deployer\Entity\SubversionBranch $account
+	 * @param \Primat\Deployer\Entity\SubversionBranch $account
 	 */
 	public function addBranch($uri, $alias, $account = NULL)
 	{
 		$uri = trim($uri, '/');
-		if ($account instanceof \Deployer\Entity\Account) {
+		if ($account instanceof \Primat\Deployer\Entity\Account) {
 			$this->account = $account;
 		}
-		$this->branches[] = new \Deployer\Entity\SubversionBranch("/branches/$uri", $alias);
+		$this->branches[] = new \Primat\Deployer\Entity\SubversionBranch("/branches/$uri", $alias);
 	}
 
 	/**
 	 * @param string $uri
 	 * @param string $alias
-	 * @param \Deployer\Entity\SubversionBranch $account
+	 * @param \Primat\Deployer\Entity\SubversionBranch $account
 	 */
 	public function addTag($uri, $alias, $account = NULL)
 	{
 		$uri = trim($uri, '/');
-		if ($account instanceof \Deployer\Entity\Account) {
+		if ($account instanceof \Primat\Deployer\Entity\Account) {
 			$this->account = $account;
 		}
-		$this->tags[] = new \Deployer\Entity\SubversionBranch("/tags/$uri", $alias);
+		$this->tags[] = new \Primat\Deployer\Entity\SubversionBranch("/tags/$uri", $alias);
 	}
 
 	/**
 	 * @param string $uri
 	 * @param string $alias
-	 * @param \Deployer\Entity\SubversionBranch $account
+	 * @param \Primat\Deployer\Entity\SubversionBranch $account
 	 */
 	public function setTrunk($uri, $alias = 'trunk', $account = NULL)
 	{
 		$uri = trim($uri, '/');
-		if ($account instanceof \Deployer\Entity\Account) {
+		if ($account instanceof \Primat\Deployer\Entity\Account) {
 			$this->account = $account;
 		}
-		$this->trunk = new \Deployer\Entity\SubversionBranch("/trunk/$uri", $alias);
+		$this->trunk = new \Primat\Deployer\Entity\SubversionBranch("/trunk/$uri", $alias);
 	}
 
 	/**

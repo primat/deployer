@@ -6,7 +6,7 @@
  * Time: 10:16 AM
  */
 
-namespace Deployer\Entity;
+namespace Primat\Deployer\Entity;
 
 class DeployProperties {
 

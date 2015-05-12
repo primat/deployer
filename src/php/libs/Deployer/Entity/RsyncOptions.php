@@ -1,12 +1,12 @@
-<?php namespace Deployer\Entity;
+<?php namespace Primat\Deployer\Entity;
 
-use \Deployer\Entity\Dir;
-use \Deployer\Utils\Cygwin;
+use \Primat\Deployer\Entity\Dir;
+use \Primat\Deployer\Utils\Cygwin;
 
 
 /**
  * Class Rsync
- * @package Deployer\Entity\Command
+ * @package Primat\Deployer\Entity\Command
  */
 class RsyncOptions
 {
@@ -43,10 +43,10 @@ class RsyncOptions
 	/** @var bool $stats */
 	public $stats = TRUE;
 
-	/** @var \Deployer\Entity\Dir|\Deployer\Entity\File $source */
+	/** @var \Primat\Deployer\Entity\Dir|\Primat\Deployer\Entity\File $source */
 	public $source = '';
 
-	/** @var \Deployer\Entity\Dir|\Deployer\Entity\File $destination */
+	/** @var \Primat\Deployer\Entity\Dir|\Primat\Deployer\Entity\File $destination */
 	public $destination = '';
 
 	/** @var bool $sshStrictHostKeyChecking */

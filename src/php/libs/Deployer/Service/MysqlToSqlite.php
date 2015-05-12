@@ -2,11 +2,11 @@
 /**
  *
  */
-namespace Deployer\Service;
+namespace Primat\Deployer\Service;
 
 /**
  * Class MysqlToSqlite
- * @package Deployer\Service
+ * @package Primat\Deployer\Service
  */
 class MysqlToSqlite
 {

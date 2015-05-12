@@ -1,6 +1,6 @@
 <?php
 
-namespace Deployer\Entity;
+namespace Primat\Deployer\Entity;
 
 
 interface IDirectoryFile {

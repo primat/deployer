@@ -1,11 +1,11 @@
-<?php namespace Deployer\Task;
+<?php namespace Primat\Deployer\Task;
 
-use \Deployer\Task;
-use \Deployer\Exception;
-use \Deployer\Utils\Cygwin;
-use \Deployer\Utils\Expect;
-use \Deployer\Config;
-use \Deployer\Entity\RsyncOptions;
+use \Primat\Deployer\Task;
+use \Primat\Deployer\Exception;
+use \Primat\Deployer\Utils\Cygwin;
+use \Primat\Deployer\Utils\Expect;
+use \Primat\Deployer\Config;
+use \Primat\Deployer\Entity\RsyncOptions;
 
 /**
  * Task for synchronizing files from local to remote, local to local but not remote to remote (use SshTask for that)

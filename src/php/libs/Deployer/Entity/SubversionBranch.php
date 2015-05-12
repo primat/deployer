@@ -1,13 +1,13 @@
-<?php namespace Deployer\Entity;
+<?php namespace Primat\Deployer\Entity;
 
-use \Deployer\Exception;
+use \Primat\Deployer\Exception;
 
 /**
  * The SubversionRepository class represents what it is named after, a SVN repository
  */
 class SubversionBranch
 {
-	/** @var \Deployer\Entity\Account $account */
+	/** @var \Primat\Deployer\Entity\Account $account */
 	public $account = NULL;
 	/** @var string $alias */
 	public $alias;
@@ -18,9 +18,9 @@ class SubversionBranch
 	 * Constructor
 	 * @param string $uri
 	 * @param string $alias
-	 * @param \Deployer\Entity\Account $account
+	 * @param \Primat\Deployer\Entity\Account $account
 	 */
-	public function __construct($uri, $alias, \Deployer\Entity\Account $account)
+	public function __construct($uri, $alias, \Primat\Deployer\Entity\Account $account)
 	{
 		$this->uri = '/' . trim($uri, '/');
 		$this->alias = $alias;

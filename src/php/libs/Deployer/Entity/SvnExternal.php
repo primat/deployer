@@ -1,6 +1,6 @@
-<?php namespace Deployer\Entity;
+<?php namespace Primat\Deployer\Entity;
 
-use \Deployer\Exception;
+use \Primat\Deployer\Exception;
 
 /**
  *

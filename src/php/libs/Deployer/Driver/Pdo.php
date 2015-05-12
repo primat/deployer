@@ -7,15 +7,15 @@
  * To change this template use File | Settings | File Templates.
  */
 
-namespace Deployer\Database;
+namespace Primat\Deployer\Database;
 
-use Deployer\Database\Exception\ConnectionException;
-use Deployer\Database\Exception\RuntimeException;
+use Primat\Deployer\Database\Exception\ConnectionException;
+use Primat\Deployer\Database\Exception\RuntimeException;
 
 /**
  * The Pdo class handle very basic database functionality
  * Class Pdo
- * @package Deployer\Database
+ * @package Primat\Deployer\Database
  */
 class Pdo extends \PDO
 {

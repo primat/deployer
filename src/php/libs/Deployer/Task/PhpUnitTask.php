@@ -1,6 +1,6 @@
-<?php namespace Deployer\Task;
+<?php namespace Primat\Deployer\Task;
 
-use \Deployer\Task;
+use \Primat\Deployer\Task;
 
 /**
  * A class for running phpunit tests

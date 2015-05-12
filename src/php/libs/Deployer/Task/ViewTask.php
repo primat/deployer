@@ -1,6 +1,6 @@
-<?php namespace Deployer\Task;
+<?php namespace Primat\Deployer\Task;
 
-use \Deployer\Task;
+use \Primat\Deployer\Task;
 
 /**
  *
@@ -8,14 +8,14 @@ use \Deployer\Task;
 class ViewTask extends Task
 {
 	/**
-	 * @param \Deployer\Entity\SvnLogEntry[] $logEntries
+	 * @param \Primat\Deployer\Entity\SvnLogEntry[] $logEntries
 	 * @return string
 	 */
 	public static function getLogEntriesHtml(array $logEntries) {
 		$changelogHtml = '';
 		if (count($logEntries)) {
 			$changelogHtml .= '<ul>';
-			foreach($logEntries as $revision => $entry) { /* @var \Deployer\Entity\SvnLogEntry $entry */
+			foreach($logEntries as $revision => $entry) { /* @var \Primat\Deployer\Entity\SvnLogEntry $entry */
 				$changelogHtml .= "<li><strong>{$revision}</strong><br />" . nl2br(trim($entry->message)) . "<br/><br/></li>";
 			}
 			$changelogHtml .= '</ul>';
@@ -24,12 +24,12 @@ class ViewTask extends Task
 	}
 
 	/**
-	 * @param \Deployer\Entity\SvnLogEntry[] $logEntries
+	 * @param \Primat\Deployer\Entity\SvnLogEntry[] $logEntries
 	 * @return string
 	 */
 	public static function getLogEntriesText(array $logEntries) {
 		$changelogText = '';
-		foreach($logEntries as $revision => $entry) { /* @var \Deployer\Entity\SvnLogEntry $entry */
+		foreach($logEntries as $revision => $entry) { /* @var \Primat\Deployer\Entity\SvnLogEntry $entry */
 			$changelogText .= "{$revision}:\n" . trim($entry->message) . "\n\n";
 		}
 		return $changelogText;

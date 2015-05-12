@@ -1,30 +1,71 @@
-<?php namespace Deployer;
+<?php namespace Primat\Deployer;
 
-use Deployer\Config;
-use Deployer\Service\Logger;
-use Deployer\Task\CliTask;
+use Primat\Deployer\Config;
+use Primat\Deployer\Service\Logger;
+use Primat\Deployer\Task\CliTask;
 use Pimple\Container;
 
 /**
  * Class for handling application operations such as exception handlers, shutdown functions, etc
  */
-
 class App
 {
 	/** @var int $startTime The time that the build script started running */
-	//protected $startTime = 0;
-
-
-    protected $container;
+	protected $startTime = 0;
+	/** @var $container Container */
+	protected $container;
+	/** @var $isCli bool */
+	protected $isCli;
 
 	/**
-	 * Initialize the build app
+	 * Constructor - Initialize the app
 	 */
 	public function __construct()
 	{
-		//$projectFolder
-		//$this->startTime = time();
+		// Start the script timer
+		$this->startTime = time();
 
+		// Initialize the dependencies container
+		$this->container = new Container();
+
+		/*
+		 * Whether or not the script is running in the CLI as opposed to a request for a web page
+		 */
+		$this->isCli = substr(php_sapi_name(), 0, 3) === 'cli';
+		if (! $this->isCli) {
+			$this->enableOutputFlush();
+		}
+
+		if ($_SERVER['argc'] < 2) {
+			echo 'Usage: php ' . $_SERVER['argv'][0] . ' <controller> <method> [param1 param2 ...]';
+			exit;
+		}
+
+		// Establish the controller and method to call
+		$controllerName = $_SERVER['argv'][1];
+		$methodName = (isset($_SERVER['argv'][2])) ? $_SERVER['argv'][2] : 'index';
+
+		if (is_file($controllerName . '.php')) {
+			include_once $controllerName . '.php';
+		}
+		else {
+			echo 'Unable to locate controller ' . $controllerName . "\n";
+			exit;
+		}
+
+		/** @var $controller DeployerProject */
+		$controller = new $controllerName();
+
+		if (! method_exists($controller, $methodName)) {
+			echo 'Undefined method ' . $methodName . "\n";
+			exit;
+		}
+
+
+		$controller->$methodName();
+
+
+exit;
 
 
 //		$container['emailTask'];
@@ -117,8 +158,8 @@ class App
 //		/*
 //		 * Register some important handlers
 //		 */
-//		set_exception_handler(array('\Deployer\Task', 'exceptionHandler'));
-//		register_shutdown_function(array('\Deployer\Task', 'endOfScriptMaintenance'));
+//		set_exception_handler(array('\Primat\Deployer\Task', 'exceptionHandler'));
+//		register_shutdown_function(array('\Primat\Deployer\Task', 'endOfScriptMaintenance'));
 //
 //		/*
 //		 * Load the default build configuration
@@ -141,19 +182,18 @@ class App
 //	{
 //		return realpath(__DIR__ . '/../../../../') . '/';
 //	}
-//
-//	/**
-//	 * Flushes output for the HTTP buffer
-//	 */
-//	private static function enableOutputFlush()
-//	{
-//		ini_set('output_buffering', 'off');
-//		ini_set('zlib.output_compression', false);
-//		while (@ob_end_flush());
-//		ini_set('implicit_flush', true);
-//		ob_implicit_flush(true);
-//	}
 
+	/**
+	 * Flushes output for the HTTP buffer
+	 */
+	protected static function enableOutputFlush()
+	{
+		ini_set('output_buffering', 'off');
+		ini_set('zlib.output_compression', false);
+		while (@ob_end_flush());
+		ini_set('implicit_flush', true);
+		ob_implicit_flush(true);
+	}
 
     /**
      * @param DeployerProject $project
@@ -162,7 +202,6 @@ class App
 	{
 		//echo get_class($project);
 
-        $this->container = new Container();
 
         $container['project'] = $project;
 
@@ -174,11 +213,6 @@ class App
             return new CliTask($c['logger']);
         };
 
-
-	}
-
-	public function runScript($className, $methodName)
-	{
 
 	}
 

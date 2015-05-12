@@ -1,4 +1,4 @@
-<?php namespace Deployer;
+<?php namespace Primat\Deployer;
 /**
  *
  */

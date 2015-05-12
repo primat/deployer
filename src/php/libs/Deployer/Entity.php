@@ -1,11 +1,11 @@
-<?php namespace Deployer;
+<?php namespace Primat\Deployer;
 
 /**
  *
  */
 class Entity
 {
-	/** @var \Deployer\Entity[][] $pool Stores all initialized entities */
+	/** @var \Primat\Deployer\Entity[][] $pool Stores all initialized entities */
 	protected static $pool = array();
 
 	/**

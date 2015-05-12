@@ -1,7 +1,7 @@
-<?php namespace Deployer\Entity;
+<?php namespace Primat\Deployer\Entity;
 
-use \Deployer\Entity;
-use \Deployer\Entity\Dir;
+use \Primat\Deployer\Entity;
+use \Primat\Deployer\Entity\Dir;
 
 /**
  * This entity class represents a File

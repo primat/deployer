@@ -19,7 +19,7 @@
     },
 	"autoload": {
         "psr-4": {
-            "Deployer\\": [ "src/php/libs/Deployer", "tests/phpunit/Deployer" ]
+            "Primat\\Primat\Deployer\\": [ "src/php/libs/Deployer", "tests/phpunit/Deployer" ]
 		}
     }
 }

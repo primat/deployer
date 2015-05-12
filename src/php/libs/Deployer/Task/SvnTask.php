@@ -1,15 +1,15 @@
-<?php namespace Deployer\Task;
+<?php namespace Primat\Deployer\Task;
 
-use \Deployer\Entity\WorkingCopy;
-use \Deployer\Entity\SvnExternal;
-use \Deployer\Entity\SvnInfo;
-use \Deployer\Entity\SvnLogEntry;
-use \Deployer\Entity\SvnTag;
-use \Deployer\Exception;
-use \Deployer\Exception\WorkingCopyException;
-use \Deployer\Task\FileSystemTask;
-use \Deployer\Config;
-use \Deployer\Task;
+use \Primat\Deployer\Entity\WorkingCopy;
+use \Primat\Deployer\Entity\SvnExternal;
+use \Primat\Deployer\Entity\SvnInfo;
+use \Primat\Deployer\Entity\SvnLogEntry;
+use \Primat\Deployer\Entity\SvnTag;
+use \Primat\Deployer\Exception;
+use \Primat\Deployer\Exception\WorkingCopyException;
+use \Primat\Deployer\Task\FileSystemTask;
+use \Primat\Deployer\Config;
+use \Primat\Deployer\Task;
 
 /**
  * Class for doing subversion related tasks
@@ -17,7 +17,7 @@ use \Deployer\Task;
 class SvnTask extends Task
 {
 	/**
-	 * @param \Deployer\Entity\WorkingCopy $workingCopy
+	 * @param \Primat\Deployer\Entity\WorkingCopy $workingCopy
 	 * @param int $revision
 	 * @param bool $ignoreExternals
 	 */
@@ -54,7 +54,7 @@ class SvnTask extends Task
 
 	/**
 	 * Check out a clean working copy from SVN
-	 * @param \Deployer\Entity\WorkingCopy $workingCopy
+	 * @param \Primat\Deployer\Entity\WorkingCopy $workingCopy
 	 * @param int $revision
 	 * @param int $externalsRevision
 	 */
@@ -152,7 +152,7 @@ class SvnTask extends Task
 	}
 
 	/**
-	 * @param \Deployer\Entity\WorkingCopy $workingCopy
+	 * @param \Primat\Deployer\Entity\WorkingCopy $workingCopy
 	 */
 	public static function checkoutTag(WorkingCopy $workingCopy)
 	{
@@ -192,7 +192,7 @@ class SvnTask extends Task
 	 * @param WorkingCopy $workingCopy
 	 * @param string $revisionFilePath
 	 * @param bool $fullTimestamp
-	 * @throws \Deployer\Exception
+	 * @throws \Primat\Deployer\Exception
 	 */
 	public static function createManifestFile(WorkingCopy $workingCopy, $revisionFilePath = '', $fullTimestamp = FALSE)
 	{
@@ -221,7 +221,7 @@ class SvnTask extends Task
 	/**
 	 * @param WorkingCopy $workingCopy
 	 * @return int
-	 * @throws \Deployer\Exception
+	 * @throws \Primat\Deployer\Exception
 	 */
 	public static function getBranchHeadRevision(WorkingCopy $workingCopy)
 	{
@@ -249,9 +249,9 @@ class SvnTask extends Task
 	}
 
 	/**
-	 * @param \Deployer\Entity\WorkingCopy $workingCopy
+	 * @param \Primat\Deployer\Entity\WorkingCopy $workingCopy
 	 * @return mixed
-	 * @throws \Deployer\Exception
+	 * @throws \Primat\Deployer\Exception
 	 */
 	public static function getExternals(WorkingCopy $workingCopy)
 	{
@@ -275,7 +275,7 @@ class SvnTask extends Task
 	 * @deprecated
 	 * @param WorkingCopy $workingCopy
 	 * @return array
-	 * @throws \Deployer\Exception
+	 * @throws \Primat\Deployer\Exception
 	 */
 	public static function getExternalsArray(WorkingCopy $workingCopy)
 	{
@@ -317,7 +317,7 @@ class SvnTask extends Task
 	}
 
 	/**
-	 * @param \Deployer\Entity\WorkingCopy $workingCopy
+	 * @param \Primat\Deployer\Entity\WorkingCopy $workingCopy
 	 * @return int
 	 */
 	public static function getHeadRevision(WorkingCopy $workingCopy)
@@ -332,8 +332,8 @@ class SvnTask extends Task
 	}
 
 	/**
-	 * @param \Deployer\Entity\WorkingCopy $workingCopy
-	 * @return \Deployer\Entity\SvnInfo
+	 * @param \Primat\Deployer\Entity\WorkingCopy $workingCopy
+	 * @return \Primat\Deployer\Entity\SvnInfo
 	 */
 	public static function getInfo(WorkingCopy $workingCopy)
 	{
@@ -343,7 +343,7 @@ class SvnTask extends Task
 	}
 
 	/**
-	 * @param \Deployer\Entity\WorkingCopy $workingCopy
+	 * @param \Primat\Deployer\Entity\WorkingCopy $workingCopy
 	 * @param int $limit
 	 * @return array
 	 */
@@ -444,7 +444,7 @@ class SvnTask extends Task
 	/**
 	 * @param WorkingCopy $workingCopy
 	 * @return int
-	 * @throws \Deployer\Exception
+	 * @throws \Primat\Deployer\Exception
 	 */
 	public static function getLastTagRevision(WorkingCopy $workingCopy)
 	{
@@ -504,7 +504,7 @@ class SvnTask extends Task
 	 * @param WorkingCopy $workingCopy
 	 * @param string $commitText
 	 * @return int
-	 * @throws \Deployer\Exception
+	 * @throws \Primat\Deployer\Exception
 	 */
 	public static function getLastDeployRevision(WorkingCopy $workingCopy, $commitText="Release to Production")
 	{
@@ -542,7 +542,7 @@ class SvnTask extends Task
 	 * @param WorkingCopy $workingCopy
 	 * @param int $maxEntries
 	 * @return array
-	 * @throws \Deployer\Exception
+	 * @throws \Primat\Deployer\Exception
 	 */
 	public static function getLatestLogEntries(WorkingCopy $workingCopy, $maxEntries = 40)
 	{
@@ -571,11 +571,11 @@ class SvnTask extends Task
 
 
 	/**
-	 * @param \Deployer\Entity\WorkingCopy $workingCopy
+	 * @param \Primat\Deployer\Entity\WorkingCopy $workingCopy
 	 * @param $fromRevision
 	 * @param $toRevision
 	 * @return array
-	 * @throws \Deployer\Exception
+	 * @throws \Primat\Deployer\Exception
 	 */
 	public static function getLogEntries(WorkingCopy $workingCopy, $fromRevision, $toRevision)
 	{
@@ -604,9 +604,9 @@ class SvnTask extends Task
 
 	/**
 	 * Get an object representing information for a repository URL
-	 * @param \Deployer\Entity\WorkingCopy $workingCopy
+	 * @param \Primat\Deployer\Entity\WorkingCopy $workingCopy
 	 * @param int $revision
-	 * @return \Deployer\Entity\SvnInfo
+	 * @return \Primat\Deployer\Entity\SvnInfo
 	 */
 	public static function getRepoInfo(WorkingCopy $workingCopy, $revision = 0)
 	{
@@ -631,9 +631,9 @@ class SvnTask extends Task
 	}
 
 	/**
-	 * @param \Deployer\Entity\WorkingCopy $workingCopy
+	 * @param \Primat\Deployer\Entity\WorkingCopy $workingCopy
 	 * @return array
-	 * @throws \Deployer\Exception
+	 * @throws \Primat\Deployer\Exception
 	 */
 	public static function getTags(WorkingCopy $workingCopy)
 	{
@@ -665,7 +665,7 @@ class SvnTask extends Task
 	}
 
 	/**
-	 * @param \Deployer\Entity\WorkingCopy $workingCopy
+	 * @param \Primat\Deployer\Entity\WorkingCopy $workingCopy
 	 * @return bool
 	 */
 	public static function isCheckedOut(WorkingCopy $workingCopy)
@@ -680,8 +680,8 @@ class SvnTask extends Task
 	}
 
 	/**
-	 * @param \Deployer\Entity\WorkingCopy $workingCopy
-	 * @throws \Deployer\Exception\WorkingCopyException
+	 * @param \Primat\Deployer\Entity\WorkingCopy $workingCopy
+	 * @throws \Primat\Deployer\Exception\WorkingCopyException
 	 */
 	public static function loadInfo(WorkingCopy $workingCopy)
 	{
@@ -764,7 +764,7 @@ class SvnTask extends Task
 	/**
 	 * @param $path
 	 * @param $externalsText
-	 * @throws \Deployer\Exception
+	 * @throws \Primat\Deployer\Exception
 	 */
 	public static function setExternals($path, $externalsText)
 	{
@@ -820,7 +820,7 @@ class SvnTask extends Task
 	}
 
 	/**
-	 * @param \Deployer\Entity\WorkingCopy $workingCopy
+	 * @param \Primat\Deployer\Entity\WorkingCopy $workingCopy
 	 * @param string $revision
 	 * @return bool
 	 */
@@ -865,7 +865,7 @@ class SvnTask extends Task
 	}
 
 	/**
-	 * @param \Deployer\Entity\WorkingCopy $tag
+	 * @param \Primat\Deployer\Entity\WorkingCopy $tag
 	 * @param string $workingCopyPath
 	 * @param $message
 	 */
@@ -886,7 +886,7 @@ class SvnTask extends Task
 	/**
 	 * @param $workingCopy
 	 * @param int $revision
-	 * @throws \Deployer\Exception
+	 * @throws \Primat\Deployer\Exception
 	 */
 	public static function update($workingCopy, $revision = 0)
 	{

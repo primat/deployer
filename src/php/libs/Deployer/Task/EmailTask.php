@@ -1,10 +1,10 @@
-<?php namespace Deployer\Task;
+<?php namespace Primat\Deployer\Task;
 
-use \Deployer\Entity\Email;
-use \Deployer\Entity\Email\Connector;
-use \Deployer\Entity\Email\SmtpConnector;
-use \Deployer\Exception;
-use \Deployer\Task;
+use \Primat\Deployer\Entity\Email;
+use \Primat\Deployer\Entity\Email\Connector;
+use \Primat\Deployer\Entity\Email\SmtpConnector;
+use \Primat\Deployer\Exception;
+use \Primat\Deployer\Task;
 
 require_once BUILD_ROOT_DIR . '/vendor/autoload.php';
 
@@ -19,7 +19,7 @@ class EmailTask extends Task
 	 * @param $subject
 	 * @param $body
 	 * @param array $headers
-	 * @throws \Deployer\Exception
+	 * @throws \Primat\Deployer\Exception
 	 */
 	public function send($sendToList, $subject, $body, $headers = array())
 	{
@@ -34,9 +34,9 @@ class EmailTask extends Task
 
 	/**
 	 * Send an email using PHPMailer
-	 * @param \Deployer\Entity\Email\Connector $connector
-	 * @param \Deployer\Entity\Email $emailData
-	 * @throws \Deployer\Exception
+	 * @param \Primat\Deployer\Entity\Email\Connector $connector
+	 * @param \Primat\Deployer\Entity\Email $emailData
+	 * @throws \Primat\Deployer\Exception
 	 */
 	public static function sendEmail(Connector $connector, Email $emailData)
 	{

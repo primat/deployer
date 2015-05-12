@@ -1,9 +1,9 @@
-<?php namespace Deployer\Exception;
+<?php namespace Primat\Deployer\Exception;
 
 /**
  *
  */
-class CommandException extends \Deployer\Exception
+class CommandException extends \Primat\Deployer\Exception
 {
 
 }

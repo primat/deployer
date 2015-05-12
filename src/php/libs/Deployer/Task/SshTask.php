@@ -1,10 +1,10 @@
-<?php namespace Deployer\Task;
+<?php namespace Primat\Deployer\Task;
 
-use \Deployer\Entity\Host;
-use \Deployer\Entity\Database;
-use \Deployer\Entity\File;
-use \Deployer\Exception;
-use \Deployer\Task;
+use \Primat\Deployer\Entity\Host;
+use \Primat\Deployer\Entity\Database;
+use \Primat\Deployer\Entity\File;
+use \Primat\Deployer\Exception;
+use \Primat\Deployer\Task;
 
 require_once BUILD_ROOT_DIR . '/vendor/autoload.php';
 require_once BUILD_ROOT_DIR . '/vendor/phpseclib/phpseclib/phpseclib/Net/SFTP.php';
@@ -25,9 +25,9 @@ class SshTask extends Task
 	public static $handles = array();
 
 	/**
-	 * @param \Deployer\Entity\Host $host
+	 * @param \Primat\Deployer\Entity\Host $host
 	 * @return \Net_SFTP
-	 * @throws \Deployer\Exception
+	 * @throws \Primat\Deployer\Exception
 	 */
 	public static function connect(Host $host)
 	{
@@ -56,7 +56,7 @@ class SshTask extends Task
 	 * Copies a file on the remote server from $remoteFile->path to $newPath
 	 * @param File $remoteFile
 	 * @param $newPath
-	 * @throws \Deployer\Exception
+	 * @throws \Primat\Deployer\Exception
 	 */
 	public static function copyFile(File $remoteFile, $newPath)
 	{
@@ -81,7 +81,7 @@ class SshTask extends Task
 	/**
 	 * @param Host $remoteHost
 	 * @return array
-	 * @throws \Deployer\Exception
+	 * @throws \Primat\Deployer\Exception
 	 */
 //	public static function getAuthorizedKeys(Host $remoteHost)
 //	{
@@ -126,7 +126,7 @@ class SshTask extends Task
 	/**
 	 * Provides automation for command line ssh commands which require a tty/pty
 	 * @param Host $remoteHost
-	 * @throws \Deployer\Exception
+	 * @throws \Primat\Deployer\Exception
 	 */
 	public static function GenerateTemporaryKeyPair(Host $remoteHost)
 	{
@@ -199,10 +199,10 @@ class SshTask extends Task
 	}
 
 	/**
-	 * @param \Deployer\Entity\File $localFile
-	 * @param \Deployer\Entity\File $remoteFile
+	 * @param \Primat\Deployer\Entity\File $localFile
+	 * @param \Primat\Deployer\Entity\File $remoteFile
 	 * @param int $chmod
-	 * @throws \Deployer\Exception
+	 * @throws \Primat\Deployer\Exception
 	 */
 	public static function uploadFile(File $localFile, File $remoteFile, $chmod = 0664)
 	{
@@ -223,7 +223,7 @@ class SshTask extends Task
 	 * Moves a file on the remote server from $remoteFile->path to $newPath
 	 * @param File $remoteFile
 	 * @param $newPath
-	 * @throws \Deployer\Exception
+	 * @throws \Primat\Deployer\Exception
 	 */
 	public static function moveFile(File $remoteFile, $newPath)
 	{
@@ -237,8 +237,8 @@ class SshTask extends Task
 	}
 
 	/**
-	 * @param \Deployer\Entity\File $localDumpFile
-	 * @param \Deployer\Entity\Database $db
+	 * @param \Primat\Deployer\Entity\File $localDumpFile
+	 * @param \Primat\Deployer\Entity\Database $db
 	 * @param string $dbName
 	 */
 	public static function importDb(File $localDumpFile, Database $db, $dbName)
@@ -252,10 +252,10 @@ class SshTask extends Task
 	/**
 	 * Import a sql file into mysql by copying a temp file through SSH then importing it with mysql and deleting the
 	 * dump afterward
-	 * @param \Deployer\Entity\File $dumpFile
-	 * @param \Deployer\Entity\Database $db
+	 * @param \Primat\Deployer\Entity\File $dumpFile
+	 * @param \Primat\Deployer\Entity\Database $db
 	 * @param $dbName
-	 * @throws \Deployer\Exception
+	 * @throws \Primat\Deployer\Exception
 	 */
 	public static function mysqlImport(File $dumpFile, Database $db, $dbName)
 	{
@@ -268,7 +268,7 @@ class SshTask extends Task
 	/**
 	 * Delete a file on the remote Host
 	 * @param File $remoteFile
-	 * @throws \Deployer\Exception
+	 * @throws \Primat\Deployer\Exception
 	 */
 	public static function deleteFile(File $remoteFile)
 	{
@@ -286,10 +286,10 @@ class SshTask extends Task
 
 	/**
 	 * Execute a one-off command on a remote host
-	 * @param \Deployer\Entity\Host $host The host to run the command on
+	 * @param \Primat\Deployer\Entity\Host $host The host to run the command on
 	 * @param string $command The actual command to execute
 	 * @param bool $printOutput Whether or not to display the output from the command
-	 * @throws \Deployer\Exception
+	 * @throws \Primat\Deployer\Exception
 	 */
 	public static function exec(Host $host, $command, $printOutput = TRUE)
 	{
@@ -328,7 +328,7 @@ class SshTask extends Task
 
 	/**
 	 * Tests if a given file exists on the remote server
-	 * @param \Deployer\Entity\File $file
+	 * @param \Primat\Deployer\Entity\File $file
 	 * @return bool
 	 */
 	public static function fileExists(File $file)
@@ -349,7 +349,7 @@ class SshTask extends Task
 	/**
 	 * Run this method after executing a command to detect errors
 	 * @param \Net_SSH2 $handle
-	 * @throws \Deployer\Exception
+	 * @throws \Primat\Deployer\Exception
 	 */
 	protected static function checkCmdExceptions(\Net_SSH2 $handle)
 	{

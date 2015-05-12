@@ -1,6 +1,6 @@
-<?php namespace Deployer\Task;
+<?php namespace Primat\Deployer\Task;
 
-use Deployer\Task;
+use Primat\Deployer\Task;
 
 /**
  * The TimerTask class is a chronometer for measuring script execution time

@@ -1,4 +1,4 @@
-<?php namespace Deployer\Entity;
+<?php namespace Primat\Deployer\Entity;
 
 /**
  * A class for storing Email related data such as a list of recipients or reply-to address, for example
