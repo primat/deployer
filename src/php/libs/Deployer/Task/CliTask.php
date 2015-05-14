@@ -15,13 +15,15 @@ class CliTask extends Task
 	/**  @var $viewTask \Primat\Deployer\Service\Logger */
 	protected $logger;
 
-	/**
-	 * Constructor
-	 */
-	public function __construct(Logger $logger)
-	{
-		$this->logger = $logger;
-	}
+    /**
+     * Constructor
+     * @param Logger $logger
+     */
+//	public function __construct(Logger $logger)
+//	{
+//		$this->logger = $logger;
+//	}
+    public function __construct() {}
 
 	/**
 	 * Prompt the user for an account password

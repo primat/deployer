@@ -85,7 +85,7 @@ class Task
 			//stream_set_blocking($pipes[2] , 0);
 
 			while (! feof($pipes [1])) {
-				$read = fread($pipes[1] , self::CMD_IO_BUFFER);
+				$read = fread($pipes[1], self::CMD_IO_BUFFER);
 				$result .= $read;
 				if ($echoOutput) {
 					self::log($read);
