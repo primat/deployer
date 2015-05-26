@@ -6,23 +6,18 @@ use \Primat\Deployer\Entity\Host;
 /**
  *
  */
-class Dir extends Entity implements IDirectoryFile
+class Dir implements IDirectoryFile
 {
 	/** @var Host $host The host object - Null if local */
 	public $host;
-
 	/** @var string $name The file name */
 	public $name = '';
-
 	/** @var string $path The full path to the resource */
 	public $path = ''; // Should always contains a trailing slash, for directory paths
-
 	/** @var bool $isWinDir flag to indicate if the path is a Windows path */
 	public $isWinDir = '';
-
 	/** @var bool $isRemote Simple flag to indicate if the resource is remote or not */
 	protected $isRemote = FALSE;
-
 	/** @var string $separator The separator used when evaluating paths */
 	protected $separator = '/';
 
@@ -33,8 +28,6 @@ class Dir extends Entity implements IDirectoryFile
 	 */
 	public function __construct($dirName, Host $host = NULL)
 	{
-		parent::__construct();
-
 		// Establish if the path is a windows path or not
 		$this->isWinDir = (mb_substr($dirName, 1, 1) === ':');
 		$this->name = $dirName;

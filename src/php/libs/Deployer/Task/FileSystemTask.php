@@ -5,7 +5,7 @@ use Primat\Deployer\Exception;
 /**
  *
  */
-class FileSystemTask extends \Primat\Deployer\Task
+class FileSystemTask
 {
 	/**
 	 * Recursively iterate through a directory and delete all files and folders

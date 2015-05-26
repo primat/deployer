@@ -5,14 +5,28 @@
  * Time: 10:16 PM
  */
 
-
 use Primat\Deployer\Exception\CommandException;
 use Primat\Deployer\Exception\ExitStatusException;
 
-
+/**
+ * Class CommandTask
+ * @package Primat\Deployer\Task
+ */
 class CommandTask
 {
+	/**  @var $viewTask \Primat\Deployer\Task\OutputTask */
+	protected $outputTask;
+
     protected $cmdIoBuffer = 4096;
+
+	/**
+	 * Constructor
+	 * @param OutputTask $outputTask
+	 */
+	public function __construct(OutputTask $outputTask)
+	{
+		$this->outputTask = $outputTask;
+	}
 
     /**
      * @param $cmd
@@ -42,7 +56,7 @@ class CommandTask
                 $read = fread($pipes[1], $this->cmdIoBuffer);
                 $result .= $read;
                 if ($echoOutput) {
-                    self::log($read);
+					$this->outputTask->log($read);
                 }
             }
 

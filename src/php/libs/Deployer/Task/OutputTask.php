@@ -13,50 +13,93 @@ use Primat\Deployer\Service\Logging\ILogger;
  */
 class OutputTask
 {
-    /** var $muteOutput Bool */
-    protected $muteOutput;
-    /** var $fileLog ILogger */
-    protected $fileLog;
-    /** var $outPutLog ILogger */
-    protected $outPutLog;
+	/** @var $loggers ILogger[] */
+	protected $loggers;
+    /** @var $muteOutput Bool */
+    protected $mute;
 
-    public function __construct(ILogger $fileLog, ILogger $outPutLog)
+	/**
+	 * Constructor
+	 * @param ILogger $logger
+	 */
+	public function __construct(Ilogger $logger)
     {
-        $this->fileLog = $fileLog;
-        $this->outPutLog = $outPutLog;
+		$this->loggers[] = $logger;
     }
 
+	/**
+	 * ADd a logger to log output to
+	 * @param ILogger $logger
+	 */
+	public function addLogger(ILogger $logger)
+	{
+		$this->loggers[] = $logger;
+	}
+
     /**
-     * @param $message
+     * @param $message String
      */
     public function log($message)
     {
-        if ($this->muteOutput || $message == '') { // $message == '' is intentional
+        if ($this->mute || $message == '') { // $message == '' is intentional
             return;
         }
 
-        if (! empty($this->fileLog)) {
-            $this->fileLog->log($message);
-        }
-
-        if (! empty($this->outPutLog)) {
-            $this->outPutLog->log($message);
+		foreach ($this->loggers as $logger) {
+			$logger->log($message);
         }
     }
+
+	/**
+	 *
+	 */
+	public function logElapsedTime($startTime)
+	{
+		$endTime = time();
+		$elapsedTime = $endTime - $startTime;
+
+		if ($elapsedTime === $endTime) {
+			$elapsedTime = 0;
+		}
+
+		$this->log("\n---------------------------------------\n");
+		$this->log("Script execution time: " . gmdate("H:i:s", $elapsedTime));
+		$this->log("\n---------------------------------------\n\n");
+	}
+
+	/**
+	 * @param $message String
+	 */
+	public function logException($message)
+	{
+		$this->log($message . "\n\nAbandon ship!\n---------------------------------------\n");
+	}
+
+	/**
+	 * @param $message String
+	 */
+	public function logScriptHeading($message)
+	{
+		$this->log("\n---------------------------------------\n-------- {$message}\n\n");
+	}
+
+	//
+	// Getters and setters
+	//
 
     /**
      * @return mixed
      */
-    public function getMuteOutput()
+    public function getMute()
     {
-        return $this->muteOutput;
+        return $this->mute;
     }
 
-    /**
-     * @param mixed $muteOutput
-     */
-    public function setMuteOutput($muteOutput)
-    {
-        $this->muteOutput = $muteOutput;
-    }
+	/**
+	 * @param mixed $mute
+	 */
+	public function setMute($mute)
+	{
+		$this->mute = $mute;
+	}
 }

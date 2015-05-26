@@ -10,7 +10,7 @@ use \Primat\Deployer\Exception\LoggerException;
  * Class Logger
  * @package Primat\Deployer\Service\Logging
  */
-class FileLogger
+class FileLogger implements ILogger
 {
     /** @var resource $logFileHandle */
     protected $logFileHandle;

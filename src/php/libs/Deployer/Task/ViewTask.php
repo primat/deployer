@@ -5,13 +5,25 @@ use \Primat\Deployer\Task;
 /**
  *
  */
-class ViewTask extends Task
+class ViewTask
 {
+	/** @var string $folderViews */
+	protected $folderViews;
+
+	/**
+	 * Constructor
+	 * @param $projectFolder
+	 */
+	public function __construct($projectFolder)
+	{
+		$this->projectFolder = $projectFolder;
+	}
+
 	/**
 	 * @param \Primat\Deployer\Entity\SvnLogEntry[] $logEntries
 	 * @return string
 	 */
-	public static function getLogEntriesHtml(array $logEntries) {
+	public function getLogEntriesHtml(array $logEntries) {
 		$changelogHtml = '';
 		if (count($logEntries)) {
 			$changelogHtml .= '<ul>';
@@ -27,7 +39,7 @@ class ViewTask extends Task
 	 * @param \Primat\Deployer\Entity\SvnLogEntry[] $logEntries
 	 * @return string
 	 */
-	public static function getLogEntriesText(array $logEntries) {
+	public function getLogEntriesText(array $logEntries) {
 		$changelogText = '';
 		foreach($logEntries as $revision => $entry) { /* @var \Primat\Deployer\Entity\SvnLogEntry $entry */
 			$changelogText .= "{$revision}:\n" . trim($entry->message) . "\n\n";
@@ -41,7 +53,7 @@ class ViewTask extends Task
 	 * @param bool $noEcho
 	 * @return string
 	 */
-	public static function load($path, array $data = NULL, $noEcho = FALSE)
+	public function load($path, array $data = NULL, $noEcho = FALSE)
 	{
 		if (isset($data) && count($data)) {
 			extract($data);
@@ -50,7 +62,7 @@ class ViewTask extends Task
 		if ($noEcho) {
 			ob_start();
 		}
-		include SCRIPT_DIR . '/' . $path;
+		include $this->projectFolder . '/' . $path;
 		if ($noEcho) {
 			$content = ob_get_contents();
 			ob_end_clean();

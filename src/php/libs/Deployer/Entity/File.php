@@ -6,11 +6,10 @@ use \Primat\Deployer\Entity\Dir;
 /**
  * This entity class represents a File
  */
-class File extends Entity implements IDirectoryFile
+class File implements IDirectoryFile
 {
 	/** @var Dir $dir The directory object corresponding to this File */
 	public $dir;
-
 	/** @var string $name The name of the file */
 	public $name = '';
 

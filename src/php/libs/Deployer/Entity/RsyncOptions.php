@@ -12,58 +12,40 @@ class RsyncOptions
 {
 	/** @var string $chmod */
 	public $chmod = 'Du=rwx,Dg=rwx,Do=rx,Fu=rw,Fg=rw,Fo=r';
-
 	/** @var bool $delayUpdates */
 	public $delayUpdates= FALSE;
-
 	/** @var bool $delete */
 	public $delete = TRUE;
-
 	/** @var bool $deleteAfter */
 	public $deleteAfter = FALSE;
-
 	/** @var bool $deleteExcluded */
 	public $deleteExcluded = FALSE;
-
 	/** @var bool $dryRun */
 	public $dryRun = FALSE;
-
 	/** @var string $flags */
 	public $flags = 'vzrltCOp';
-
 	/** @var bool $noMotd */
 	public $noMotd = TRUE;
-
 	/** @var bool $progress */
 	public $progress = FALSE;
-
 	/** @var bool $safeLinks */
 	public $safeLinks = TRUE;
-
 	/** @var bool $stats */
 	public $stats = TRUE;
-
 	/** @var \Primat\Deployer\Entity\Dir|\Primat\Deployer\Entity\File $source */
 	public $source = '';
-
 	/** @var \Primat\Deployer\Entity\Dir|\Primat\Deployer\Entity\File $destination */
 	public $destination = '';
-
 	/** @var bool $sshStrictHostKeyChecking */
 	public $sshStrictHostKeyChecking = FALSE;
-
 	/** @var bool $useSsh */
 	public $useSsh = TRUE;
-
 	/** @var bool $useHostIdentity */
 	public $useHostIdentity = TRUE;
-
 	/** * @var string[] $includes */
 	public $includes = array('core/');
-
 	/** @var string[] $excludes */
 	public $excludes = array('.*/', '.DS_Store', '.iml');
-
 
 	/**
 	 * @param Dir|File $source

@@ -1,6 +1,8 @@
 <?php namespace Primat\Deployer\Task;
 
 use \Primat\Deployer\Entity\WorkingCopy;
+use \Primat\Deployer\Entity\Repository;
+use \Primat\Deployer\Entity\RepositoryBranch;
 use \Primat\Deployer\Entity\SvnExternal;
 use \Primat\Deployer\Entity\SvnInfo;
 use \Primat\Deployer\Entity\SvnLogEntry;
@@ -8,20 +10,39 @@ use \Primat\Deployer\Entity\SvnTag;
 use \Primat\Deployer\Exception;
 use \Primat\Deployer\Exception\WorkingCopyException;
 use \Primat\Deployer\Task\FileSystemTask;
-use \Primat\Deployer\Config;
 use \Primat\Deployer\Task;
 
 /**
  * Class for doing subversion related tasks
  */
-class SvnTask extends Task
+class SvnTask
 {
+	/**  @var string $cmdSvn */
+	protected $cmdSvn;
+	/**  @var \Primat\Deployer\Task\OutputTask $outputTask */
+	protected $outputTask;
+	/**  @var \Primat\Deployer\Task\CommandTask $commandTask */
+	protected $commandTask;
+
+	/**
+	 * Constructor
+	 * @param OutputTask $outputTask
+	 * @param CommandTask $commandTask
+	 * @param string $cmdSvn
+	 */
+	public function __construct(OutputTask $outputTask, CommandTask $commandTask, $cmdSvn = 'svn')
+	{
+		$this->outputTask = $outputTask;
+		$this->commandTask = $commandTask;
+		$this->cmdSvn = $cmdSvn;
+	}
+
 	/**
 	 * @param \Primat\Deployer\Entity\WorkingCopy $workingCopy
 	 * @param int $revision
 	 * @param bool $ignoreExternals
 	 */
-	public static function checkout(WorkingCopy $workingCopy, $revision = 0, $ignoreExternals = TRUE)
+	public function checkout(WorkingCopy $workingCopy, $revision = 0, $ignoreExternals = TRUE)
 	{
 		$revision = (int)$revision;
 		$cmdParams = '';
@@ -35,21 +56,21 @@ class SvnTask extends Task
 		}
 
 		// Do the checkout
-		self::log("- Checking out ");
+		$this->outputTask->log("- Checking out ");
 		if ($revision > 0) {
-			self::log("revision {$revision}\n");
+			$this->outputTask->log("revision {$revision}\n");
 		}
 		else {
-			self::log("head revision\n");
+			$this->outputTask->log("head revision\n");
 		}
-		$cmd = Config::get('svn.bin') . " --force --depth infinity {$cmdParams}checkout " .
+		$cmd = $this->cmdSvn . " --force --depth infinity {$cmdParams}checkout " .
 			$workingCopy->repoUrl . " " . $workingCopy->dir->getPath() . " " .
 			"--username {$workingCopy->account->username} " .
 			"--password {$workingCopy->account->password} " .
 			"--config-option config:miscellany:use-commit-times=yes " .
 			"--non-interactive --trust-server-cert --no-auth-cache 2>&1";
 		self::runCmd($cmd);
-		self::log("\n");
+		$this->outputTask->log("\n");
 	}
 
 	/**
@@ -58,21 +79,21 @@ class SvnTask extends Task
 	 * @param int $revision
 	 * @param int $externalsRevision
 	 */
-	public static function checkoutClean(WorkingCopy $workingCopy, $revision = 0, $externalsRevision = 0)
+	public function checkoutClean(WorkingCopy $workingCopy, $revision = 0, $externalsRevision = 0)
 	{
 		$rev = ($revision === 0) ? 'HEAD' : $revision;
 		$extRev = ($externalsRevision === 0) ? 'HEAD' : $rev;
-		self::log("-- Getting a clean checkout at ");
+		$this->outputTask->log("-- Getting a clean checkout at ");
 		if ($revision > 0) {
-			self::log("revision {$revision}");
+			$this->outputTask->log("revision {$revision}");
 		}
 		else {
-			self::log("head revision");
+			$this->outputTask->log("head revision");
 		}
 		if ($externalsRevision > 0 ) {
-			self::log(" with externals at revision $externalsRevision");
+			$this->outputTask->log(" with externals at revision $externalsRevision");
 		}
-		self::log("\n\n");
+		$this->outputTask->log("\n\n");
 
 		// Get the repo information to validate the requested revision numbers to checkout
 		$svnRemoteInfo = self::getRepoInfo($workingCopy, $revision);
@@ -81,7 +102,7 @@ class SvnTask extends Task
 
 		// Correct the requested revision number to the last commit one from the repo
 		if ($revision !== $realRevision) {
-			self::log("Check out last commit revision {$realRevision}\n\n");
+			$this->outputTask->log("Check out last commit revision {$realRevision}\n\n");
 		}
 
 		// Determine the real externals revision number as well
@@ -92,7 +113,7 @@ class SvnTask extends Task
 			$svnRemoteExtInfo = self::getRepoInfo($workingCopy, $externalsRevision);
 			// Correct the requested revision number to the last commit one from the repo
 			if ($externalsRevision !== $svnRemoteExtInfo->commitRevision) {
-				self::log("Checking out last (externals) commit revision {$svnRemoteExtInfo->commitRevision}\n\n");
+				$this->outputTask->log("Checking out last (externals) commit revision {$svnRemoteExtInfo->commitRevision}\n\n");
 				$realExtRevision = $svnRemoteExtInfo->commitRevision;
 			}
 		}
@@ -110,13 +131,13 @@ class SvnTask extends Task
 		// The Working copy and remote repo do not share the same URL.
 		// We must delete the working copy and do a fresh checkout
 		if (! empty($workingCopy->info) && $workingCopy->info->url !== $svnRemoteInfo->url) {
-			self::log("- Emptying the working copy folder\n\n");
+			$this->outputTask->log("- Emptying the working copy folder\n\n");
 			FileSystemTask::rrmdir($workingCopy->dir->getPath(), FALSE);
 			$workingCopy->info = NULL;
 		}
 
 		if ($workingCopy->info === NULL) {
-			self::log("- Checkout a fresh copy\n\n");
+			$this->outputTask->log("- Checkout a fresh copy\n\n");
 			self::checkout($workingCopy, $realRevision);
 			$workingCopy->info = SvnTask::getInfo($workingCopy);
 		}
@@ -139,22 +160,22 @@ class SvnTask extends Task
 	 * @param WorkingCopy $workingCopy
 	 * @param string $commitMessage
 	 */
-	public static function commit(WorkingCopy $workingCopy, $commitMessage = '')
+	public function commit(WorkingCopy $workingCopy, $commitMessage = '')
 	{
-		self::log("- Committing {$workingCopy->dir->getPath()} to {$workingCopy->repoUrl}\n");
-		$cmd = Config::get('svn.bin') . " commit " . $workingCopy->dir->getPath() . " " .
+		$this->outputTask->log("- Committing {$workingCopy->dir->getPath()} to {$workingCopy->repoUrl}\n");
+		$cmd = $this->cmdSvn . " commit " . $workingCopy->dir->getPath() . " " .
 			'-m "' . $commitMessage . '" ' .
 			"--username {$workingCopy->account->username} " .
 			"--password {$workingCopy->account->password} " .
 			"--non-interactive --trust-server-cert --no-auth-cache 2>&1";
 		self::runCmd($cmd);
-		self::log("\n");
+		$this->outputTask->log("\n");
 	}
 
 	/**
 	 * @param \Primat\Deployer\Entity\WorkingCopy $workingCopy
 	 */
-	public static function checkoutTag(WorkingCopy $workingCopy)
+	public function checkoutTag(WorkingCopy $workingCopy)
 	{
 		// Checkout the tag to a temporary location
 		if (is_dir($workingCopy->dir->getPath())) {
@@ -165,27 +186,27 @@ class SvnTask extends Task
 		}
 
 		// Do the check out
-		self::log("- Checking out {$workingCopy->repoUrl}\n");
-		$cmd = Config::get('svn.bin') . " --force --depth infinity checkout " .
+		$this->outputTask->log("- Checking out {$workingCopy->repoUrl}\n");
+		$cmd = $this->cmdSvn . " --force --depth infinity checkout " .
 			$workingCopy->repoUrl . " " . $workingCopy->dir->getPath() . " " .
 			"--username {$workingCopy->account->username} " .
 			"--password {$workingCopy->account->password} " .
 			"--config-option config:miscellany:use-commit-times=yes " .
 			"--non-interactive --trust-server-cert --no-auth-cache 2>&1";
 		self::runCmd($cmd);
-		self::log("\n");
+		$this->outputTask->log("\n");
 	}
 
 	/**
 	 * Cleans up a working copy (directory)
 	 * @param $workingCopy
 	 */
-	public static function cleanUp($workingCopy)
+	public function cleanUp($workingCopy)
 	{
-		self::log("- Running svn cleanup\n");
-		$cmd = Config::get('svn.bin') . " cleanup {$workingCopy->dir->getPath()} 2>&1";
+		$this->outputTask->log("- Running svn cleanup\n");
+		$cmd = $this->cmdSvn . " cleanup {$workingCopy->dir->getPath()} 2>&1";
 		self::runCmd($cmd);
-		self::log("\n");
+		$this->outputTask->log("\n");
 	}
 
 	/**
@@ -194,13 +215,13 @@ class SvnTask extends Task
 	 * @param bool $fullTimestamp
 	 * @throws \Primat\Deployer\Exception
 	 */
-	public static function createManifestFile(WorkingCopy $workingCopy, $revisionFilePath = '', $fullTimestamp = FALSE)
+	public function createManifestFile(WorkingCopy $workingCopy, $revisionFilePath = '', $fullTimestamp = FALSE)
 	{
 		if (empty($revisionFilePath)) {
 			$revisionFilePath = $workingCopy->dir->getPath() . 'manifest';
 		}
 		// Create the file
-		self::log("- Creating manifest file\n");
+		$this->outputTask->log("- Creating manifest file\n");
 
 		$revision = self::getRevision($workingCopy);
 
@@ -215,7 +236,7 @@ class SvnTask extends Task
 			throw new Exception("Unable to create manifest file");
 		}
 
-		self::log("Created file {$revisionFilePath} for revision {$revision}\n\n");
+		$this->outputTask->log("Created file {$revisionFilePath} for revision {$revision}\n\n");
 	}
 
 	/**
@@ -223,9 +244,9 @@ class SvnTask extends Task
 	 * @return int
 	 * @throws \Primat\Deployer\Exception
 	 */
-	public static function getBranchHeadRevision(WorkingCopy $workingCopy)
+	public function getBranchHeadRevision(WorkingCopy $workingCopy)
 	{
-		$cmd = Config::get('svn.bin') . " log {$workingCopy->repoUrl}" .
+		$cmd = $this->cmdSvn . " log {$workingCopy->repoUrl}" .
 			" --username {$workingCopy->account->username}" .
 			" --password {$workingCopy->account->password}" .
 			" --xml --stop-on-copy --limit 1 --non-interactive --trust-server-cert --no-auth-cache 2>&1";
@@ -253,9 +274,9 @@ class SvnTask extends Task
 	 * @return mixed
 	 * @throws \Primat\Deployer\Exception
 	 */
-	public static function getExternals(WorkingCopy $workingCopy)
+	public function getExternals(WorkingCopy $workingCopy)
 	{
-		$cmd = Config::get('svn.bin') . " propget -R svn:externals {$workingCopy->dir->getPath()} --xml 2>&1";
+		$cmd = $this->cmdSvn . " propget -R svn:externals {$workingCopy->dir->getPath()} --xml 2>&1";
 		$xml = self::runCmd($cmd, FALSE);
 
 		$xmlObj = @simplexml_load_string($xml);
@@ -277,11 +298,11 @@ class SvnTask extends Task
 	 * @return array
 	 * @throws \Primat\Deployer\Exception
 	 */
-	public static function getExternalsArray(WorkingCopy $workingCopy)
+	public function getExternalsArray(WorkingCopy $workingCopy)
 	{
-		self::log("- Getting list of externals\n");
+		$this->outputTask->log("- Getting list of externals\n");
 		$result = array();
-		$cmd = Config::get('svn.bin') . " propget -R svn:externals " .
+		$cmd = $this->cmdSvn . " propget -R svn:externals " .
 			"{$workingCopy->dir->getPath()} " .
 			"--username {$workingCopy->account->username} " .
 			"--password {$workingCopy->account->password} " .
@@ -312,7 +333,7 @@ class SvnTask extends Task
 				$result[$index]['path'] = $tmpParts[1];
 			}
 		}
-		self::log("\n");
+		$this->outputTask->log("\n");
 		return $result;
 	}
 
@@ -320,9 +341,9 @@ class SvnTask extends Task
 	 * @param \Primat\Deployer\Entity\WorkingCopy $workingCopy
 	 * @return int
 	 */
-	public static function getHeadRevision(WorkingCopy $workingCopy)
+	public function getHeadRevision(WorkingCopy $workingCopy)
 	{
-		$cmd = Config::get('svn.bin') . " info {$workingCopy->repoUrl} --xml " .
+		$cmd = $this->cmdSvn . " info {$workingCopy->repoUrl} --xml " .
 			"--username {$workingCopy->account->username} " .
 			"--password {$workingCopy->account->password} " .
 			"--non-interactive --trust-server-cert --no-auth-cache 2>&1";
@@ -335,9 +356,9 @@ class SvnTask extends Task
 	 * @param \Primat\Deployer\Entity\WorkingCopy $workingCopy
 	 * @return \Primat\Deployer\Entity\SvnInfo
 	 */
-	public static function getInfo(WorkingCopy $workingCopy)
+	public function getInfo(WorkingCopy $workingCopy)
 	{
-		$cmd = Config::get('svn.bin') . " info {$workingCopy->dir->getPath()} --xml 2>&1";
+		$cmd = $this->cmdSvn . " info {$workingCopy->dir->getPath()} --xml 2>&1";
 		$xml = self::runCmd($cmd, FALSE);
 		return new SvnInfo($xml);
 	}
@@ -347,16 +368,16 @@ class SvnTask extends Task
 	 * @param int $limit
 	 * @return array
 	 */
-	public static function getLastTagUrls(WorkingCopy $workingCopy, $limit = 5)
+	public function getLastTagUrls(WorkingCopy $workingCopy, $limit = 5)
 	{
 		$repoUrl = rtrim($workingCopy->repoUrl, '/'); // The base repo url
 		$urls = array(); // The urls to be returned
 
 		// Start by getting the first level of folder names - each name corresponds to the year of the release so they
 		// must be sorted to get the latest ones
-		self::log("- Getting the latest tags\n");
+		$this->outputTask->log("- Getting the latest tags\n");
 
-		$cmd = Config::get('svn.bin') . " list {$workingCopy->repoUrl} " .
+		$cmd = $this->cmdSvn . " list {$workingCopy->repoUrl} " .
 			"--username {$workingCopy->account->username} " .
 			"--password {$workingCopy->account->password} " .
 			"--non-interactive --trust-server-cert --no-auth-cache 2>&1";
@@ -368,7 +389,7 @@ class SvnTask extends Task
 
 		$counter = 0;
 		foreach($segments as $i => $segment) {
-			$cmd = Config::get('svn.bin') . " list {$workingCopy->repoUrl}/{$segment} " .
+			$cmd = $this->cmdSvn . " list {$workingCopy->repoUrl}/{$segment} " .
 				"--username {$workingCopy->account->username} " .
 				"--password {$workingCopy->account->password} " .
 				"--non-interactive --trust-server-cert --no-auth-cache 2>&1";
@@ -390,7 +411,7 @@ class SvnTask extends Task
 			}
 		}
 
-		self::log("\n");
+		$this->outputTask->log("\n");
 		return $urls;
 	}
 
@@ -401,7 +422,7 @@ class SvnTask extends Task
 //	public static function getLastCommits($repoUrl, $qty = 5)
 //	{
 //		$result = array();
-//		$cmd = Config::get('svn.bin') . " log {$repoUrl} --limit {$qty} 2>&1";
+//		$cmd = $this->cmdSvn . " log {$repoUrl} --limit {$qty} 2>&1";
 //		$output = self::runCmd($cmd, FALSE);
 //		$output = trim($output, '-');
 //		$output = trim($output, "\n");
@@ -446,11 +467,11 @@ class SvnTask extends Task
 	 * @return int
 	 * @throws \Primat\Deployer\Exception
 	 */
-	public static function getLastTagRevision(WorkingCopy $workingCopy)
+	public function getLastTagRevision(WorkingCopy $workingCopy)
 	{
 		$revision = 0;
 		$tag = NULL;
-		$cmd = Config::get('svn.bin') . " log {$workingCopy->repoUrl} " .
+		$cmd = $this->cmdSvn . " log {$workingCopy->repoUrl} " .
 			"--username {$workingCopy->account->username} " .
 			"--password {$workingCopy->account->password} " .
 			" --xml -v --stop-on-copy --limit 40 --non-interactive --trust-server-cert --no-auth-cache 2>&1";
@@ -506,12 +527,12 @@ class SvnTask extends Task
 	 * @return int
 	 * @throws \Primat\Deployer\Exception
 	 */
-	public static function getLastDeployRevision(WorkingCopy $workingCopy, $commitText="Release to Production")
+	public function getLastDeployRevision(WorkingCopy $workingCopy, $commitText="Release to Production")
 	{
 		$logLimit = 10;
 		$revision = -1;
 		$tag = NULL;
-		$cmd = Config::get('svn.bin') . " log {$workingCopy->repoUrl}" .
+		$cmd = $this->cmdSvn . " log {$workingCopy->repoUrl}" .
 			" --username {$workingCopy->account->username}" .
 			" --password {$workingCopy->account->password}" .
 			" --xml --stop-on-copy --limit " . $logLimit .
@@ -539,20 +560,21 @@ class SvnTask extends Task
 	}
 
 	/**
-	 * @param WorkingCopy $workingCopy
+	 * @param RepositoryBranch $branch
 	 * @param int $maxEntries
 	 * @return array
 	 * @throws \Primat\Deployer\Exception
 	 */
-	public static function getLatestLogEntries(WorkingCopy $workingCopy, $maxEntries = 40)
+	public function getLatestLogEntries(RepositoryBranch $branch, $maxEntries = 40)
 	{
+		$account = $branch->repository->account;
 		$entries = array();
-		$cmd = Config::get('svn.bin') . " log {$workingCopy->repoUrl}" .
-			" --username {$workingCopy->account->username}" .
-			" --password {$workingCopy->account->password}" .
+		$cmd = $this->cmdSvn . " log {$branch->getUrl()}" .
+			" --username {$account->username}" .
+			" --password {$account->password}" .
 			" --limit $maxEntries" .
 			" --xml --non-interactive --trust-server-cert --no-auth-cache 2>&1";
-		$xml = self::runCmd($cmd, FALSE);
+		$xml = $this->commandTask->runCmd($cmd, FALSE);
 
 		// Parse the XML
 		$xmlObj = @simplexml_load_string($xml);
@@ -577,10 +599,10 @@ class SvnTask extends Task
 	 * @return array
 	 * @throws \Primat\Deployer\Exception
 	 */
-	public static function getLogEntries(WorkingCopy $workingCopy, $fromRevision, $toRevision)
+	public function getLogEntries(WorkingCopy $workingCopy, $fromRevision, $toRevision)
 	{
 		$entries = array();
-		$cmd = Config::get('svn.bin') . " log -r{$fromRevision}:{$toRevision} {$workingCopy->repoUrl} " .
+		$cmd = $this->cmdSvn . " log -r{$fromRevision}:{$toRevision} {$workingCopy->repoUrl} " .
 			"--username {$workingCopy->account->username} " .
 			"--password {$workingCopy->account->password} " .
 			" --xml --non-interactive --trust-server-cert --no-auth-cache 2>&1";
@@ -608,10 +630,10 @@ class SvnTask extends Task
 	 * @param int $revision
 	 * @return \Primat\Deployer\Entity\SvnInfo
 	 */
-	public static function getRepoInfo(WorkingCopy $workingCopy, $revision = 0)
+	public function getRepoInfo(WorkingCopy $workingCopy, $revision = 0)
 	{
 		$revisionParam = ($revision > 0) ? "@{$revision}" : '';
-		$cmd = Config::get('svn.bin') . " info {$workingCopy->repoUrl}{$revisionParam} " .
+		$cmd = $this->cmdSvn . " info {$workingCopy->repoUrl}{$revisionParam} " .
 			"--username {$workingCopy->account->username} " .
 			"--password {$workingCopy->account->password} " .
 			"--non-interactive --trust-server-cert --xml --no-auth-cache 2>&1";
@@ -622,7 +644,7 @@ class SvnTask extends Task
 	/**
 	 *
 	 */
-	public static function getRevision(WorkingCopy $workingCopy)
+	public function getRevision(WorkingCopy $workingCopy)
 	{
 		if (! isset($workingCopy->info->commitRevision)) {
 			$workingCopy->info = self::getInfo($workingCopy);
@@ -635,10 +657,10 @@ class SvnTask extends Task
 	 * @return array
 	 * @throws \Primat\Deployer\Exception
 	 */
-	public static function getTags(WorkingCopy $workingCopy)
+	public function getTags(WorkingCopy $workingCopy)
 	{
 		$tags = array();
-		$cmd = Config::get('svn.bin') . " log {$workingCopy->repoUrl} " .
+		$cmd = $this->cmdSvn . " log {$workingCopy->repoUrl} " .
 			"--username {$workingCopy->account->username} " .
 			"--password {$workingCopy->account->password} " .
 			" --xml -v --stop-on-copy --non-interactive --trust-server-cert --no-auth-cache 2>&1";
@@ -668,7 +690,7 @@ class SvnTask extends Task
 	 * @param \Primat\Deployer\Entity\WorkingCopy $workingCopy
 	 * @return bool
 	 */
-	public static function isCheckedOut(WorkingCopy $workingCopy)
+	public function isCheckedOut(WorkingCopy $workingCopy)
 	{
 		if ($workingCopy->info === NULL) {
 			try {
@@ -683,10 +705,10 @@ class SvnTask extends Task
 	 * @param \Primat\Deployer\Entity\WorkingCopy $workingCopy
 	 * @throws \Primat\Deployer\Exception\WorkingCopyException
 	 */
-	public static function loadInfo(WorkingCopy $workingCopy)
+	public function loadInfo(WorkingCopy $workingCopy)
 	{
 		if ($workingCopy->info === NULL) {
-			$cmd = Config::get('svn.bin') . " info {$workingCopy->dir->getPath()} " .
+			$cmd = $this->cmdSvn . " info {$workingCopy->dir->getPath()} " .
 				"--username {$workingCopy->account->username} " .
 				"--password {$workingCopy->account->password} " .
 				"--non-interactive --trust-server-cert --no-auth-cache 2>&1";
@@ -720,11 +742,11 @@ class SvnTask extends Task
 	 * @param WorkingCopy $workingCopy
 	 * @throws Exception
 	 */
-	public static function purgeIgnoredAndUnversioned($workingCopy)
+	public function purgeIgnoredAndUnversioned($workingCopy)
 	{
 		// Remove unversioned and ignored files/folders
-		self::log("- Removing ignored and unversioned files and folders\n");
-		$cmd = Config::get('svn.bin') . " status --no-ignore " .
+		$this->outputTask->log("- Removing ignored and unversioned files and folders\n");
+		$cmd = $this->cmdSvn . " status --no-ignore " .
 			"--username {$workingCopy->account->username} " .
 			"--password {$workingCopy->account->password} " .
 			"--non-interactive --trust-server-cert --no-auth-cache {$workingCopy->dir->getPath()} 2>&1";
@@ -735,7 +757,7 @@ class SvnTask extends Task
 		foreach($output as $lineNumber => $line) {
 			if (preg_match('/^(I|\?)\s{7}/', $line) === 1) {
 				$file = mb_substr($line, 8);
-				self::log("Deleting {$file}\n");
+				$this->outputTask->log("Deleting {$file}\n");
 				if (file_exists($file)){
 					if (is_dir($file)) {
 						FileSystemTask::rrmdir($file);
@@ -746,19 +768,19 @@ class SvnTask extends Task
 				}
 			}
 		}
-		self::log("\n");
+		$this->outputTask->log("\n");
 	}
 
 	/**
 	 * @param WorkingCopy $workingCopy
 	 * @throws Exception
 	 */
-	public static function revert($workingCopy)
+	public function revert($workingCopy)
 	{
-		$command = Config::get('svn.bin') . " revert -R {$workingCopy->dir->getPath()} 2>&1";
-		self::log("- Reverting changes\n");
+		$command = $this->cmdSvn . " revert -R {$workingCopy->dir->getPath()} 2>&1";
+		$this->outputTask->log("- Reverting changes\n");
 		self::runCmd($command);
-		self::log("\n");
+		$this->outputTask->log("\n");
 	}
 
 	/**
@@ -766,13 +788,13 @@ class SvnTask extends Task
 	 * @param $externalsText
 	 * @throws \Primat\Deployer\Exception
 	 */
-	public static function setExternals($path, $externalsText)
+	public function setExternals($path, $externalsText)
 	{
 		$tmpFilePath = BUILD_TMP_DIR . '/tmp-svn-externals.txt';
 		if (file_put_contents($tmpFilePath, $externalsText) === FALSE) {
 			throw new Exception('Could not create temporary file for svn externals');
 		}
-		$cmd = Config::get('svn.bin') . " propset svn:externals -F {$tmpFilePath} {$path} 2>&1";
+		$cmd = $this->cmdSvn . " propset svn:externals -F {$tmpFilePath} {$path} 2>&1";
 		self::runCmd($cmd);
 		unlink($tmpFilePath);
 	}
@@ -783,24 +805,24 @@ class SvnTask extends Task
 	 * @param int $revisionNbr
 	 * @return bool
 	 */
-	public static function setExternalsRevision($workingCopy, $revisionNbr = 0)
+	public function setExternalsRevision($workingCopy, $revisionNbr = 0)
 	{
 		$revisionNbr = (int)$revisionNbr;
 		$revisionNbrStr = ($revisionNbr === 0) ? '' : '@'.(string)$revisionNbr;
 
-		self::log("- Setting externals to ");
+		$this->outputTask->log("- Setting externals to ");
 		if ($revisionNbr === 0) {
-			self::log("head revision\n");
+			$this->outputTask->log("head revision\n");
 		}
 		else {
-			self::log("revision {$revisionNbr}\n");
+			$this->outputTask->log("revision {$revisionNbr}\n");
 		}
 
 		self::$muteOutput = TRUE;
 		$externals = self::getExternalsArray($workingCopy);
 		self::$muteOutput = FALSE;
 		if (count($externals) === 0) {
-			self::log("No externals to set!\n\n");
+			$this->outputTask->log("No externals to set!\n\n");
 			return FALSE;
 		}
 
@@ -811,11 +833,11 @@ class SvnTask extends Task
 
 		$tmpFilePath = $workingCopy->dir->getPath() . '/tmp-svn-externals.txt';
 		file_put_contents($tmpFilePath, $fileContents);
-		$cmd = Config::get('svn.bin') . " propset svn:externals -F {$tmpFilePath} {$workingCopy->dir->getPath()} 2>&1";
+		$cmd = $this->cmdSvn . " propset svn:externals -F {$tmpFilePath} {$workingCopy->dir->getPath()} 2>&1";
 
 		self::runCmd($cmd);
 		unlink($tmpFilePath);
-		self::log("\n");
+		$this->outputTask->log("\n");
 		return TRUE;
 	}
 
@@ -824,16 +846,16 @@ class SvnTask extends Task
 	 * @param string $revision
 	 * @return bool
 	 */
-	public static function setExternalsToRevision(WorkingCopy $workingCopy, $revision = '')
+	public function setExternalsToRevision(WorkingCopy $workingCopy, $revision = '')
 	{
 		$exts = array();
 
-		self::log("- Setting externals to ");
+		$this->outputTask->log("- Setting externals to ");
 		if ($revision === '') {
-			self::log("head revision\n");
+			$this->outputTask->log("head revision\n");
 		}
 		else {
-			self::log("revision {$revision}\n");
+			$this->outputTask->log("revision {$revision}\n");
 		}
 
 		// Get the externals when they've not been loaded yet
@@ -860,7 +882,7 @@ class SvnTask extends Task
 		foreach($exts as $path => $externals) {
 			self::setExternals($path, $externals);
 		}
-		self::log("\n");
+		$this->outputTask->log("\n");
 		return TRUE;
 	}
 
@@ -869,18 +891,18 @@ class SvnTask extends Task
 	 * @param string $workingCopyPath
 	 * @param $message
 	 */
-	public static function tagRelease(WorkingCopy $tag, $workingCopyPath, $message)
+	public function tagRelease(WorkingCopy $tag, $workingCopyPath, $message)
 	{
 		$message = addslashes($message);
-		self::log("-- Tagging working copy\n");
-		$command = Config::get('svn.bin') . " copy {$workingCopyPath} " .
+		$this->outputTask->log("-- Tagging working copy\n");
+		$command = $this->cmdSvn . " copy {$workingCopyPath} " .
 			"{$tag->repoUrl}/" . date('Y-m-d_H-i-s') . "/ " .
 			"-m \"{$message}\" " .
 			"--username {$tag->account->username} " .
 			"--password {$tag->account->password} " .
 			"--non-interactive --trust-server-cert --no-auth-cache 2>&1";
 		self::runCmd($command);
-		self::log("\n");
+		$this->outputTask->log("\n");
 	}
 
 	/**
@@ -888,27 +910,27 @@ class SvnTask extends Task
 	 * @param int $revision
 	 * @throws \Primat\Deployer\Exception
 	 */
-	public static function update($workingCopy, $revision = 0)
+	public function update($workingCopy, $revision = 0)
 	{
 		$revision = (int)$revision;
 		$revisionToUpdate = '';
 		if ($revision > 0) {
 			$revisionToUpdate = "-r$revision ";
 		}
-		self::log("- Updating to ");
+		$this->outputTask->log("- Updating to ");
 		if ($revision > 0) {
-			self::log("revision {$revision}\n");
+			$this->outputTask->log("revision {$revision}\n");
 		}
 		else {
-			self::log("head revision\n");
+			$this->outputTask->log("head revision\n");
 		}
-		$cmd = Config::get('svn.bin') . " update {$workingCopy->dir->getPath()} {$revisionToUpdate}" .
+		$cmd = $this->cmdSvn . " update {$workingCopy->dir->getPath()} {$revisionToUpdate}" .
 			"--username {$workingCopy->account->username} " .
 			"--password {$workingCopy->account->password} " .
 			"--config-option config:miscellany:use-commit-times=yes " .
 			"--non-interactive --trust-server-cert --no-auth-cache 2>&1";
 		self::runCmd($cmd);
-		self::log("\n");
+		$this->outputTask->log("\n");
 	}
 
 	/**

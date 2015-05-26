@@ -12,7 +12,7 @@ use \Primat\Deployer\Task;
 /**
  *
  */
-class SqliteTask extends Task
+class SqliteTask
 {
 	//protected $lastDumpFileName ='';
 

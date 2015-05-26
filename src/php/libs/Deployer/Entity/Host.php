@@ -4,7 +4,7 @@ use Primat\Deployer\Entity;
 /**
  *
  */
-class Host extends Entity
+class Host
 {
 	/** @var \Primat\Deployer\Entity\Account $account */
 	public $account;
@@ -23,10 +23,8 @@ class Host extends Entity
 	 * @param $hostname
 	 * @param $name
 	 */
-	public function __construct($hostname, Account $account, $name = '')
+	public function __construct($hostname, Account $account = null, $name = '')
 	{
-		parent::__construct();
-
 		$this->account = $account;
 		$this->hostname = $hostname;
 		$this->name = $name;
@@ -37,7 +35,6 @@ class Host extends Entity
  	 */
 	public function __destruct()
 	{
-		parent::__destruct();
 		if (! empty($this->privateKeyPath) && strpos($this->privateKeyPath, BUILD_TMP_DIR) !== FALSE &&
 			is_file($this->privateKeyPath)) {
 			unlink($this->privateKeyPath);

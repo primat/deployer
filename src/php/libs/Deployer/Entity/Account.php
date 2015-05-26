@@ -4,7 +4,7 @@ use Primat\Deployer\Entity;
 /**
  *
  */
-class Account extends Entity
+class Account
 {
 	public $username;
 	public $password;
@@ -17,8 +17,6 @@ class Account extends Entity
 	 */
 	public function __construct($username, $password = '', $emailAddress = '')
 	{
-		parent::__construct();
-
 		$this->username = $username;
 		$this->password = $password;
 		$this->emailAddress = $emailAddress;

@@ -12,7 +12,7 @@ use \Primat\Deployer\Task;
 /**
  *
  */
-class MysqlTask extends Task
+class MysqlTask
 {
 	/**
 	 * @param \Primat\Deployer\Entity\Database $db

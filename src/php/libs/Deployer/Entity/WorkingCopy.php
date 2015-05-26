@@ -6,7 +6,7 @@ use Primat\Deployer\Exception;
 /**
  *
  */
-class WorkingCopy extends Entity
+class WorkingCopy
 {
 	/** @var Account $account */
 	public $account;
@@ -36,7 +36,6 @@ class WorkingCopy extends Entity
 	 */
 	public function __construct($workingCopyFolder, $baseUrl, $baseUri, Account $account)
 	{
-		parent::__construct();
 		$this->repoBaseUri = rtrim($baseUri, '/');
 		$this->repoBaseUrl = rtrim($baseUrl, '/');
 		$this->dir = new Dir($workingCopyFolder . '/' . self::dirify($this->getRepoUrl()));

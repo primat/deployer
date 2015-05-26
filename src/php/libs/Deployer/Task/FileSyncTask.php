@@ -10,7 +10,7 @@ use \Primat\Deployer\Entity\RsyncOptions;
 /**
  * Task for synchronizing files from local to remote, local to local but not remote to remote (use SshTask for that)
  */
-class FileSyncTask extends Task
+class FileSyncTask
 {
 	/**
 	 * Take a set of rsync options, build the command then run it

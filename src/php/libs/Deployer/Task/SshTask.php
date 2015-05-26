@@ -17,7 +17,7 @@ define('NET_SSH2_LOGGING', NET_SSH2_LOG_COMPLEX); // NET_SSH2_LOG_COMPLEX or NET
 /**
  *
  */
-class SshTask extends Task
+class SshTask
 {
 	const SSH_KEY_NAME = 'deployer-generated-key';
 

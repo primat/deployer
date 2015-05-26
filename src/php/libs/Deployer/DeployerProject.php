@@ -1,11 +1,10 @@
 <?php namespace Primat\Deployer;
 /**
  * Project: Deployer
- * User: mprice
  * Date: 11/05/15
  */
 
-use Pimple\Container;
+use ReflectionObject;
 
 /**
  * Class DeployerProject
@@ -13,152 +12,73 @@ use Pimple\Container;
  */
 class DeployerProject
 {
-	const DIR_LOGS = '/logs';
-	const DIR_TEMP = '/temp';
-	const DIR_WC = '/workingCopies';
-
-	/**  @var $cliTask \Primat\Deployer\Task\CliTask */
-	protected $cliTask;
-	/**  @var $emailTask \Primat\Deployer\Task\EmailTask */
-	protected $emailTask;
-	/**  @var $fileSyncTask \Primat\Deployer\Task\FileSyncTask */
-	protected $fileSyncTask;
-	/**  @var $fileSystemTask \Primat\Deployer\Task\FileSystemTask */
-	protected $fileSystemTask;
-	/**  @var $mysqlTask \Primat\Deployer\Task\MysqlTask */
-	protected $mysqlTask;
-	/**  @var $sftpTask \Primat\Deployer\Task\SftpTask */
-	protected $sftpTask;
-	/**  @var $sqliteTask \Primat\Deployer\Task\SqliteTask */
-	protected $sqliteTask;
-	/**  @var $sshTask \Primat\Deployer\Task\SshTask */
-	protected $sshTask;
-	/**  @var $svnTask \Primat\Deployer\Task\SvnTask */
-	protected $svnTask;
-	/**  @var $timerTask \Primat\Deployer\Task\TimerTask */
-	protected $timerTask;
-	/**  @var $viewTask \Primat\Deployer\Task\ViewTask */
-	protected $viewTask;
-
-	/**  @var $viewTask \Primat\Deployer\Service\Logger */
-	protected $logger;
-
-	/**  @var $viewTask \Primat\Deployer\Service\Logger */
-	//protected $logger;
-
-	/**  @var $projectFolder string */
-	protected $projectFolder = __DIR__;
-	/**  @var $tempFolder string */
-	protected $tempFolder = '';
-	/**  @var $logsFolder string */
-	protected $logsFolder = '';
-	/**  @var $workingCopiesFolder string */
-	protected $workingCopiesFolder = '';
-
-
-
+	/**  @var \Primat\Deployer\EntityCollection $entities */
+	protected $entities = null;
+	/**  @var string $folder */
+	protected $folder = '';
+	/**  @var string $name */
+	protected $name = '';
+	/**  @var string[] $scriptEntities */
+	protected $scriptEntities = [];
+	/**  @var string[] $scriptSettings */
+	protected $scriptSettings = [];
+	/**  @var string[] $settings */
+	protected $settings = [];
 
 	/**
-	 * Constructor
-	 * @param string $projectFolder
-	 * @param string $tempFolder
-	 */
-	public function __construct($projectFolder, $tempFolder)
-	{
-//		$this->tempFolder = $tempFolder . '/temp';
-//		$this->logFolder = $this->tempFolder . '/logs';
-//		$this->wcCacheFolder = $this->tempFolder . '/workingCopies';
-	}
-
-	public function registerTasks(Container $diContainer)
-	{
-		$this->cliTask = $diContainer['cliTask'];
-		$this->emailTask = $diContainer['emailTask'];
-		$this->fileSyncTask = $diContainer['fileSyncTask'];
-		$this->fileSystemTask = $diContainer['fileSystemTask'];
-		$this->mysqlTask = $diContainer['mysqlTask'];
-		$this->sftpTask = $diContainer['sftpTask'];
-		$this->sqliteTask = $diContainer['sqliteTask'];
-		$this->sshTask = $diContainer['sshTask'];
-		$this->svnTask = $diContainer['svnTask'];
-		$this->timerTask = $diContainer['timerTask'];
-		$this->viewTask = $diContainer['viewTask'];
-	}
-
-	//
-	// Getters and Setters
-	//
-
-	/**
-	 * @param string $logsFolder
-	 */
-	public function setLogsFolder($logsFolder)
-	{
-		$this->logsFolder = $logsFolder;
-	}
-
-	/**
+	 * Get the subclass's folder. It a folder has not been explicitly set, then generate one by default
 	 * @return string
 	 */
-	public function getLogsFolder()
+	public function getFolder()
 	{
-		if (empty($this->logsFolder)) {
-			return $this->projectFolder . self::DIR_LOGS;
+		if (empty($this->folder)) {
+			$reflectionClass = new ReflectionObject($this);
+			$fileName = $reflectionClass->getFileName();
+			$this->folder = dirname($fileName);
 		}
-		return $this->logsFolder;
+		return $this->folder;
 	}
 
 	/**
-	 * @param string $projectFolder
-	 */
-	public function setProjectFolder($projectFolder)
-	{
-		$this->projectFolder = $projectFolder;
-	}
-
-	/**
+	 * Get a human readable name for the project
 	 * @return string
 	 */
-	public function getProjectFolder()
+	public function getName()
 	{
-		return $this->projectFolder;
+		return $this->name;
 	}
 
 	/**
-	 * @param string $tempFolder
+	 * @param $scriptName
+	 * @return string[]
 	 */
-	public function setTempFolder($tempFolder)
+	public function getScriptEntities($scriptName)
 	{
-		$this->tempFolder = $tempFolder;
-	}
-
-	/**
-	 * @return string
-	 */
-	public function getTempFolder()
-	{
-		if (empty($this->tempFolder)) {
-			return $this->projectFolder . self::DIR_TEMP;
+		if (isset($this->scriptEntities[$scriptName])) {
+			$cb = $this->scriptEntities[$scriptName];
+			return $cb();
 		}
-		return $this->tempFolder;
+		return [];
 	}
 
 	/**
-	 * @param string $workingCopiesFolder
+	 * @param $scriptName
+	 * @return string[]
 	 */
-	public function setWorkingCopiesFolder($workingCopiesFolder)
+	public function getScriptSettings($scriptName)
 	{
-		$this->workingCopiesFolder = $workingCopiesFolder;
-	}
-
-	/**
-	 * @return string
-	 */
-	public function getWorkingCopiesFolder()
-	{
-		if (empty($this->workingCopiesFolder)) {
-			return $this->projectFolder . self::DIR_WC;
+		if (isset($this->scriptSettings[$scriptName])) {
+			return ($this->scriptSettings[$scriptName]);
 		}
-		return $this->workingCopiesFolder;
+		return [];
+	}
+
+	/**
+	 * Initial app and task settings. These override the project settings on a "per script" basis
+	 * @return string[]
+	 */
+	public function getSettings()
+	{
+		return $this->settings;
 	}
 }

@@ -5,7 +5,7 @@ use Primat\Deployer\Task;
 /**
  * The TimerTask class is a chronometer for measuring script execution time
  */
-class TimerTask extends Task
+class TimerTask
 {
 	/** @var int $lastElapsedTime */
 	protected static $lastElapsedTime = 0;

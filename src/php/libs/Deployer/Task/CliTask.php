@@ -10,20 +10,19 @@ use Primat\Deployer\Task;
 /**
  * Performs task related to the command line interface
  */
-class CliTask extends Task
+class CliTask
 {
-	/**  @var $viewTask \Primat\Deployer\Service\Logger */
-	protected $logger;
+	/**  @var \Primat\Deployer\Task\OutputTask $outputTask */
+	protected $outputTask;
 
     /**
      * Constructor
-     * @param Logger $logger
+     * @param OutputTask $outputTask
      */
-//	public function __construct(Logger $logger)
-//	{
-//		$this->logger = $logger;
-//	}
-    public function __construct() {}
+	public function __construct(OutputTask $outputTask)
+	{
+		$this->outputTask = $outputTask;
+	}
 
 	/**
 	 * Prompt the user for an account password
@@ -34,9 +33,9 @@ class CliTask extends Task
 	{
 		// Prompt for all necessary passwords
 		if (empty($account->password) || $forcePrompt) {
-			$this->logger->log('Enter password for user ' . $account->username . ': ');
+			$this->outputTask->log('Enter password for user ' . $account->username . ': ');
 			$account->password = $this->readStdin();
-			$this->logger->log("\n");
+			$this->outputTask->log("\n");
 		}
 	}
 
@@ -74,15 +73,15 @@ class CliTask extends Task
 
 		$input  = '';
 		while ($input !== 'y' && $input !== 'n') {
-			$this->logger->log( "\n" . $promptMessage );
-			$input = $this->logger->readStdin();
-			$this->logger->writeLog($input . "\n");
+			$this->outputTask->log( "\n" . $promptMessage );
+			$input = $this->readStdin();
+			$this->outputTask->log($input . "\n");
 		}
 
-		$this->logger->log("\n");
+		$this->outputTask->log("\n");
 
 		if ($input === 'n') {
-			$this->logger->log("Exiting immediately\n");
+			$this->outputTask->log("Exiting immediately\n");
 			exit();
 		}
 	}
@@ -113,22 +112,22 @@ class CliTask extends Task
 
 		while(TRUE) {
 			$result = 0;
-			$this->logger->log($customPromptText);
+			$this->outputTask->log($customPromptText);
 			$counter = 1;
 			if ($choiceCnt < 1) {
-				$this->logger->log("No choices available\n");
+				$this->outputTask->log("No choices available\n");
 			}
 			foreach($choices as $i => $choice) {
-				$this->logger->log("\t[{$counter}] {$choice}\n");
+				$this->outputTask->log("\t[{$counter}] {$choice}\n");
 				$counter++;
 			}
 
-			$this->logger->log("Choice [{$choiceText}e(x)it]: ");
-			$result = trim($this->logger->readStdin());
+			$this->outputTask->log("Choice [{$choiceText}e(x)it]: ");
+			$result = trim($this->readStdin());
 
-			$this->logger->log("\n");
+			$this->outputTask->log("\n");
 			if ($result === 'x') {
-				$this->logger->log("Exiting immediately\n");
+				$this->outputTask->log("Exiting immediately\n");
 				exit;
 			}
 			else if (ctype_digit($result) && $result > 0 && $result <= $choiceCnt) {

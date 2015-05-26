@@ -5,7 +5,7 @@ use \Primat\Deployer\Task;
 /**
  * A class for running phpunit tests
  */
-class PhpUnitTask extends Task
+class PhpUnitTask
 {
 	/**
 	 * @param string $command

@@ -4,33 +4,44 @@ use \Primat\Deployer\Entity\Email;
 use \Primat\Deployer\Entity\Email\Connector;
 use \Primat\Deployer\Entity\Email\SmtpConnector;
 use \Primat\Deployer\Exception;
-use \Primat\Deployer\Task;
-
-require_once BUILD_ROOT_DIR . '/vendor/autoload.php';
 
 /**
  * The email task takes care of sending emails
  */
-class EmailTask extends Task
+class EmailTask
 {
+	protected $mailer;
+
+	/**  @var $viewTask \Primat\Deployer\Task\OutputTask */
+	protected $outputTask;
+
 	/**
-	 * A basic PHP mail() wrapper
-	 * @param $sendToList
-	 * @param $subject
-	 * @param $body
-	 * @param array $headers
-	 * @throws \Primat\Deployer\Exception
+	 * Constructor
+	 * @param OutputTask $outputTask
 	 */
-	public function send($sendToList, $subject, $body, $headers = array())
+	public function __construct(OutputTask $outputTask)
 	{
-		echo "-- Sending email notifications...\n";
-		$headers =  implode("\r\n", $headers). "\r\n";
-		$result = mail($sendToList, $subject, $body, $headers);
-		if (! $result) {
-			throw new Exception('Email notifications failed');
-		}
-		echo "-- Email notifications sent successfully\n";
+		$this->outputTask = $outputTask;
 	}
+
+//	/**
+//	 * A basic PHP mail() wrapper
+//	 * @param $sendToList
+//	 * @param $subject
+//	 * @param $body
+//	 * @param array $headers
+//	 * @throws \Primat\Deployer\Exception
+//	 */
+//	public function send($sendToList, $subject, $body, $headers = array())
+//	{
+//		echo "-- Sending email notifications...\n";
+//		$headers =  implode("\r\n", $headers). "\r\n";
+//		$result = mail($sendToList, $subject, $body, $headers);
+//		if (! $result) {
+//			throw new Exception('Email notifications failed');
+//		}
+//		echo "-- Email notifications sent successfully\n";
+//	}
 
 	/**
 	 * Send an email using PHPMailer
@@ -38,10 +49,10 @@ class EmailTask extends Task
 	 * @param \Primat\Deployer\Entity\Email $emailData
 	 * @throws \Primat\Deployer\Exception
 	 */
-	public static function sendEmail(Connector $connector, Email $emailData)
+	public function sendEmail(Connector $connector, Email $emailData)
 	{
 		$multipleRecipients = (count($emailData->to) > 1);
-		Task::log("- Sending email {$emailData->subject}\n");
+		$this->outputTask->log("- Sending email {$emailData->subject}\n");
 
 		$mail = new \PHPMailer();
 		if ($connector instanceof SmtpConnector) {
@@ -55,7 +66,7 @@ class EmailTask extends Task
 			//Ask for HTML-friendly debug output
 			$mail->Debugoutput = 'html';
 			//Set the hostname of the mail server
-			$mail->Host = $connector->host;
+			$mail->Host = $connector->host->getHostname();
 			//Set the SMTP port number - likely to be 25, 465 or 587
 			$mail->Port = $connector->port;
 			//Whether to use SMTP authentication
@@ -95,7 +106,7 @@ class EmailTask extends Task
 
 		// Send the message, check for errors
 		if ($mail->send()) {
-			Task::log("Email notification" . ($multipleRecipients ? 's' : '') . " sent\n\n");
+			$this->outputTask->log("Email notification" . ($multipleRecipients ? 's' : '') . " sent\n\n");
 		}
 		else {
 			throw new Exception("Mailer Error: " . $mail->ErrorInfo);
@@ -109,7 +120,7 @@ class EmailTask extends Task
 	 * @param $text
 	 * @throws \Exception
 	 */
-	public static function createEmailFiles($fileBaseName, $html, $text)
+	public function createEmailFiles($fileBaseName, $html, $text)
 	{
 		if (! is_dir(BUILD_EMAILS_DIR)) {
 			mkdir(BUILD_EMAILS_DIR);

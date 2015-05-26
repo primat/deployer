@@ -5,15 +5,25 @@
  */
 class Email
 {
+	/** @var string $fromAddress */
 	public $fromAddress = '';
+	/** @var string $fromName */
 	public $fromName = '';
+	/** @var string $replyAddress */
 	public $replyAddress = '';
+	/** @var string $replyName */
 	public $replyName = '';
+	/** @var string[] $to */
 	public $to = array();
+	/** @var string $subject */
 	public $subject = '';
+	/** @var string $bodyText */
 	public $bodyText = '';
+	/** @var string $bodyHtml */
 	public $bodyHtml = '';
+	/** @var mixed[] $attachments */
 	public $attachments = array();
+	/** @var string $encoding */
 	public $encoding = 'UTF-8';
 
 	/**
