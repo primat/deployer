@@ -1,9 +1,11 @@
 <?php namespace Primat\Deployer\Entity;
 
+use \Primat\Deployer\Entity;
+
 /**
  * A class for storing Email related data such as a list of recipients or reply-to address, for example
  */
-class Email
+class Email extends Entity
 {
 	/** @var string $fromAddress */
 	public $fromAddress = '';

@@ -4,32 +4,29 @@
  * Date: 26/05/15
  */
 
+use Primat\Deployer\Entity;
+
 /**
  * Class RepositoryBranch
  * @package Primat\Deployer\Entity
  */
-class RepositoryBranch
+class RepositoryBranch extends Entity
 {
-	/** @var Repository $repository  */
-	public $repository;
-	/** @var string $uri  */
-	public $uri;
-
 	/**
-	 * @param Repository $repository
-	 * @param $uri
-	 */
-	public function __construct($uri, Repository $repository)
-	{
-		$this->repository = $repository;
-		$this->uri = $uri;
-	}
-
-	/**
+	 * @param $text
 	 * @return string
 	 */
-	public function getUrl()
+	protected function getSlug($text)
 	{
-		return $this->repository->getBaseUrl() . $this->uri;
+		$text = (string)$text;
+		if (strlen($text) === 0) {
+			return '';
+		}
+		$text = preg_replace('~[^\\pL\d]+~u', '-', $text); // Replace non letter or digits by -
+		$text = trim($text, '-');
+		$text = iconv('utf-8', 'us-ascii//TRANSLIT', $text);
+		$text = strtolower($text);
+		$text = preg_replace('~[^-\w]+~', '', $text); // Remove unwanted characters
+		return $text;
 	}
 }

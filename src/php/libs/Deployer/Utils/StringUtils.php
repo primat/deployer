@@ -1,16 +1,22 @@
-<?php
+<?php namespace Primat\Deployer\Utils;
 /**
  * Created by JetBrains PhpStorm.
- * User: mprice
  * Date: 5/29/14
- * Time: 11:25 PM
- * To change this template use File | Settings | File Templates.
  */
 
-namespace Primat\Deployer\Utils;
-
+/**
+ * Class StringUtils
+ * @package Primat\Deployer\Utils
+ */
 class StringUtils
 {
+	/**
+	 * @param $start
+	 * @param $end
+	 * @param $new
+	 * @param $source
+	 * @return mixed
+	 */
 	public function replaceWithinDelimiters($start, $end, $new, $source) {
 		return preg_replace('#('.preg_quote($start).')(.*)('.preg_quote($end).')#si', '$1'.$new.'$3', $source);
 	}

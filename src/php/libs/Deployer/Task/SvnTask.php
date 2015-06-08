@@ -1,13 +1,17 @@
 <?php namespace Primat\Deployer\Task;
 
 use \Primat\Deployer\Entity\WorkingCopy;
-use \Primat\Deployer\Entity\Repository;
 use \Primat\Deployer\Entity\RepositoryBranch;
-use \Primat\Deployer\Entity\SvnExternal;
-use \Primat\Deployer\Entity\SvnInfo;
-use \Primat\Deployer\Entity\SvnLogEntry;
-use \Primat\Deployer\Entity\SvnTag;
+use \Primat\Deployer\Entity\Svn\SvnBranch;
+use \Primat\Deployer\Entity\Svn\SvnExternal;
+use \Primat\Deployer\Entity\Svn\SvnInfo;
+use \Primat\Deployer\Entity\Svn\SvnLogEntry;
+use \Primat\Deployer\Entity\Svn\SvnRepository;
+use \Primat\Deployer\Entity\Svn\SvnTag;
+use \Primat\Deployer\Entity\Svn\SvnWorkingCopy;
 use \Primat\Deployer\Exception;
+use \Primat\Deployer\Exception\ExitStatusException;
+use \Primat\Deployer\Exception\TaskException;
 use \Primat\Deployer\Exception\WorkingCopyException;
 use \Primat\Deployer\Task\FileSystemTask;
 use \Primat\Deployer\Task;
@@ -17,33 +21,47 @@ use \Primat\Deployer\Task;
  */
 class SvnTask
 {
+	/**  @var string $cacheFolder */
+	protected $cacheFolder;
 	/**  @var string $cmdSvn */
 	protected $cmdSvn;
-	/**  @var \Primat\Deployer\Task\OutputTask $outputTask */
-	protected $outputTask;
+	/**  @var string $cmdSvnVersion */
+	protected $cmdSvnVersion;
 	/**  @var \Primat\Deployer\Task\CommandTask $commandTask */
 	protected $commandTask;
+	/**  @var \Primat\Deployer\Task\FileSystemTask $fileSystemTask */
+	protected $fileSystemTask;
+	/**  @var \Primat\Deployer\Task\OutputTask $outputTask */
+	protected $outputTask;
 
 	/**
 	 * Constructor
 	 * @param OutputTask $outputTask
 	 * @param CommandTask $commandTask
+	 * @param FileSystemTask $fileSystemTask
+	 * @param string $cacheFolder
 	 * @param string $cmdSvn
+	 * @param string $cmdSvnVersion
 	 */
-	public function __construct(OutputTask $outputTask, CommandTask $commandTask, $cmdSvn = 'svn')
+	public function __construct(OutputTask $outputTask, CommandTask $commandTask, FileSystemTask $fileSystemTask,
+		$cacheFolder, $cmdSvn = 'svn', $cmdSvnVersion = 'svnversion')
 	{
 		$this->outputTask = $outputTask;
 		$this->commandTask = $commandTask;
+		$this->fileSystemTask = $fileSystemTask;
+		$this->cacheFolder = $cacheFolder;
 		$this->cmdSvn = $cmdSvn;
+		$this->cmdSvnVersion = $cmdSvnVersion;
 	}
 
 	/**
-	 * @param \Primat\Deployer\Entity\WorkingCopy $workingCopy
+	 * @param SvnBranch $branch
 	 * @param int $revision
-	 * @param bool $ignoreExternals
+	 * @return SvnWorkingCopy
 	 */
-	public function checkout(WorkingCopy $workingCopy, $revision = 0, $ignoreExternals = TRUE)
+	public function checkout(SvnBranch $branch, $revision = 0)
 	{
+		$ignoreExternals = true;
 		$revision = (int)$revision;
 		$cmdParams = '';
 
@@ -63,97 +81,73 @@ class SvnTask
 		else {
 			$this->outputTask->log("head revision\n");
 		}
+
+		$cacheFolder = $this->getCacheFolder($branch);
+
 		$cmd = $this->cmdSvn . " --force --depth infinity {$cmdParams}checkout " .
-			$workingCopy->repoUrl . " " . $workingCopy->dir->getPath() . " " .
-			"--username {$workingCopy->account->username} " .
-			"--password {$workingCopy->account->password} " .
+			$branch->getUrl() . " " . $cacheFolder . " " .
+			"--username {$branch->repo->account->username} " .
+			"--password {$branch->repo->account->password} " .
 			"--config-option config:miscellany:use-commit-times=yes " .
 			"--non-interactive --trust-server-cert --no-auth-cache 2>&1";
-		self::runCmd($cmd);
+		$this->commandTask->runCmd($cmd);
 		$this->outputTask->log("\n");
+
+		return new SvnWorkingCopy($branch, $cacheFolder);
 	}
 
 	/**
 	 * Check out a clean working copy from SVN
-	 * @param \Primat\Deployer\Entity\WorkingCopy $workingCopy
+	 * @param \Primat\Deployer\Entity\Svn\SvnBranch $branch
 	 * @param int $revision
-	 * @param int $externalsRevision
+	 * @return SvnWorkingCopy
 	 */
-	public function checkoutClean(WorkingCopy $workingCopy, $revision = 0, $externalsRevision = 0)
+	public function checkoutClean(SvnBranch $branch, $revision = 0)
 	{
-		$rev = ($revision === 0) ? 'HEAD' : $revision;
-		$extRev = ($externalsRevision === 0) ? 'HEAD' : $rev;
+		$cacheFolder = $this->getCacheFolder($branch);
+		$this->fileSystemTask->createFolder($cacheFolder, 'working copy');
+
 		$this->outputTask->log("-- Getting a clean checkout at ");
 		if ($revision > 0) {
-			$this->outputTask->log("revision {$revision}");
+			$this->outputTask->log("revision {$revision}\n\n");
 		}
 		else {
-			$this->outputTask->log("head revision");
+			$this->outputTask->log("HEAD revision\n\n");
 		}
-		if ($externalsRevision > 0 ) {
-			$this->outputTask->log(" with externals at revision $externalsRevision");
-		}
-		$this->outputTask->log("\n\n");
 
 		// Get the repo information to validate the requested revision numbers to checkout
-		$svnRemoteInfo = self::getRepoInfo($workingCopy, $revision);
+		$svnRemoteInfo = $this->getBranchInfo($branch, $revision);
 		$realRevision = $svnRemoteInfo->commitRevision;
-		$realExtRevision = $externalsRevision;
 
-		// Correct the requested revision number to the last commit one from the repo
+		// Correct the requested revision number to the last commit revision
 		if ($revision !== $realRevision) {
-			$this->outputTask->log("Check out last commit revision {$realRevision}\n\n");
+			$this->outputTask->log("Checkout last commit revision {$realRevision}\n\n");
 		}
 
-		// Determine the real externals revision number as well
-		if ($externalsRevision === $revision) {
-			$realExtRevision = $realRevision;
-		}
-		else {
-			$svnRemoteExtInfo = self::getRepoInfo($workingCopy, $externalsRevision);
-			// Correct the requested revision number to the last commit one from the repo
-			if ($externalsRevision !== $svnRemoteExtInfo->commitRevision) {
-				$this->outputTask->log("Checking out last (externals) commit revision {$svnRemoteExtInfo->commitRevision}\n\n");
-				$realExtRevision = $svnRemoteExtInfo->commitRevision;
-			}
-		}
-
-		// Get local svn info
-		if (empty($workingCopy->info)) {
-			try {
-				$workingCopy->info = SvnTask::getInfo($workingCopy);
-			}
-			catch (Exception $e) {
-				$workingCopy->info = NULL; // Indicates that the working copy is not checked out yet
-			}
-		}
+		$svnInfo = $this->getInfoByPath($cacheFolder);
 
 		// The Working copy and remote repo do not share the same URL.
 		// We must delete the working copy and do a fresh checkout
-		if (! empty($workingCopy->info) && $workingCopy->info->url !== $svnRemoteInfo->url) {
-			$this->outputTask->log("- Emptying the working copy folder\n\n");
-			FileSystemTask::rrmdir($workingCopy->dir->getPath(), FALSE);
-			$workingCopy->info = NULL;
+		if (empty($svnInfo) || $svnInfo->getUrl() !== $svnRemoteInfo->getUrl()) {
+			$this->fileSystemTask->deleteFolder($cacheFolder, false);
+			$svnInfo = null;
 		}
 
-		if ($workingCopy->info === NULL) {
-			$this->outputTask->log("- Checkout a fresh copy\n\n");
-			self::checkout($workingCopy, $realRevision);
-			$workingCopy->info = SvnTask::getInfo($workingCopy);
+		if ($svnInfo === null) {
+			$this->outputTask->log("- Checkout a fresh working copy\n\n");
+			$workingCopy = $this->checkout($branch, $realRevision);
 		}
-		else {
-			self::cleanUp($workingCopy);
+		else { // Clean up the already existing working copy
+			$this->outputTask->log("- Cleaning up the cached working copy\n\n");
+			$workingCopy = $this->checkout($branch, $realRevision);
+			$this->cleanUp($workingCopy);
 		}
 
 		// Do a bit of cleanup
-		self::revert($workingCopy);
-		self::purgeIgnoredAndUnversioned($workingCopy);
+		$this->revert($workingCopy);
+		$this->purgeIgnoredAndUnversioned($workingCopy);
 
-		// Set the externals and update the info object
-		if (self::setExternalsToRevision($workingCopy, $realExtRevision)) {
-			self::update($workingCopy, $realRevision);
-			$workingCopy->info = SvnTask::getInfo($workingCopy);
-		}
+		return $workingCopy;
 	}
 
 	/**
@@ -168,7 +162,7 @@ class SvnTask
 			"--username {$workingCopy->account->username} " .
 			"--password {$workingCopy->account->password} " .
 			"--non-interactive --trust-server-cert --no-auth-cache 2>&1";
-		self::runCmd($cmd);
+		$this->commandTask->runCmd($cmd);
 		$this->outputTask->log("\n");
 	}
 
@@ -179,7 +173,7 @@ class SvnTask
 	{
 		// Checkout the tag to a temporary location
 		if (is_dir($workingCopy->dir->getPath())) {
-			FileSystemTask::rrmdir($workingCopy->dir->getPath(), FALSE);
+			$this->fileSystemTask->deleteFolder($workingCopy->dir->getPath(), FALSE);
 		}
 		else {
 			mkdir($workingCopy->dir->getPath(), 0775);
@@ -193,50 +187,48 @@ class SvnTask
 			"--password {$workingCopy->account->password} " .
 			"--config-option config:miscellany:use-commit-times=yes " .
 			"--non-interactive --trust-server-cert --no-auth-cache 2>&1";
-		self::runCmd($cmd);
+		$this->commandTask->runCmd($cmd);
 		$this->outputTask->log("\n");
 	}
 
 	/**
 	 * Cleans up a working copy (directory)
-	 * @param $workingCopy
+	 * @param SvnWorkingCopy $workingCopy
 	 */
 	public function cleanUp($workingCopy)
 	{
 		$this->outputTask->log("- Running svn cleanup\n");
-		$cmd = $this->cmdSvn . " cleanup {$workingCopy->dir->getPath()} 2>&1";
-		self::runCmd($cmd);
+		$cmd = $this->cmdSvn . " cleanup " . $workingCopy->dir->getPath() . " 2>&1";
+		$this->commandTask->runCmd($cmd);
 		$this->outputTask->log("\n");
 	}
 
 	/**
-	 * @param WorkingCopy $workingCopy
-	 * @param string $revisionFilePath
+	 * @param SvnWorkingCopy $workingCopy
+	 * @param string $filePath
 	 * @param bool $fullTimestamp
-	 * @throws \Primat\Deployer\Exception
+	 * @throws TaskException
 	 */
-	public function createManifestFile(WorkingCopy $workingCopy, $revisionFilePath = '', $fullTimestamp = FALSE)
+	public function createManifestFile(SvnWorkingCopy $workingCopy, $filePath = '', $fullTimestamp = false)
 	{
-		if (empty($revisionFilePath)) {
-			$revisionFilePath = $workingCopy->dir->getPath() . 'manifest';
+		if (empty($filePath)) {
+			$filePath = $workingCopy->dir->getPath() . 'manifest';
 		}
 		// Create the file
-		$this->outputTask->log("- Creating manifest file\n");
+		$this->outputTask->log("- Creating a manifest file\n");
 
-		$revision = self::getRevision($workingCopy);
+		$revision = $this->getWorkingCopyRevision($workingCopy->dir->getPath());
 
+		$extraSegment = '-' . date('Hi');
 		if ($fullTimestamp) {
-			$extraSegment = '-' . date('Hi');
-		}
-		else {
-			$extraSegment = '-' . $revision;
+			$extraSegment .= '-' . $revision;
 		}
 
-		if (file_put_contents($revisionFilePath, date("Ymd") . $extraSegment) === FALSE) {
-			throw new Exception("Unable to create manifest file");
+		if (file_put_contents($filePath, date("Ymd") . $extraSegment) === false) {
+			throw new TaskException("Unable to create manifest file");
 		}
 
-		$this->outputTask->log("Created file {$revisionFilePath} for revision {$revision}\n\n");
+		$this->outputTask->log("Created manifest file {$filePath} for revision {$revision}\n\n");
 	}
 
 	/**
@@ -250,7 +242,7 @@ class SvnTask
 			" --username {$workingCopy->account->username}" .
 			" --password {$workingCopy->account->password}" .
 			" --xml --stop-on-copy --limit 1 --non-interactive --trust-server-cert --no-auth-cache 2>&1";
-		$xml = self::runCmd($cmd, FALSE);
+		$xml = $this->commandTask->runCmd($cmd, false);
 
 		// Parse the XML
 		$xmlObj = @simplexml_load_string($xml);
@@ -270,6 +262,33 @@ class SvnTask
 	}
 
 	/**
+	 * @param SvnRepository $repo
+	 * @return array
+	 * @throws \Primat\Deployer\Exception\TaskException
+	 */
+	public function getBranchList(SvnRepository $repo)
+	{
+		$cmd = $this->cmdSvn . " list " . $repo->getBranchesUrl() . " --xml " .
+			"--username {$repo->account->username} " .
+			"--password {$repo->account->password} " .
+			"--non-interactive --trust-server-cert --no-auth-cache 2>&1";
+		$xml = $this->commandTask->runCmd($cmd, false);
+
+		// Parse the XML
+		$xmlObj = @simplexml_load_string($xml);
+		if (! $xmlObj) {
+			throw new TaskException("Unable to unmarshall XML:\n" . $xml . "\n");
+		}
+
+		/* @var $xmlObj \SimpleXmlElement */
+		$branches = [];
+		foreach($xmlObj->list->entry as $index => $entry) { /* @var $entry \SimpleXmlElement */
+			$branches[] = new SvnBranch($repo, $repo->getBranchesUri() . '/' . (string)$entry->name);
+		}
+		return $branches;
+	}
+
+	/**
 	 * @param \Primat\Deployer\Entity\WorkingCopy $workingCopy
 	 * @return mixed
 	 * @throws \Primat\Deployer\Exception
@@ -277,7 +296,7 @@ class SvnTask
 	public function getExternals(WorkingCopy $workingCopy)
 	{
 		$cmd = $this->cmdSvn . " propget -R svn:externals {$workingCopy->dir->getPath()} --xml 2>&1";
-		$xml = self::runCmd($cmd, FALSE);
+		$xml = $this->commandTask->runCmd($cmd, false);
 
 		$xmlObj = @simplexml_load_string($xml);
 		if (! $xmlObj) {
@@ -347,19 +366,28 @@ class SvnTask
 			"--username {$workingCopy->account->username} " .
 			"--password {$workingCopy->account->password} " .
 			"--non-interactive --trust-server-cert --no-auth-cache 2>&1";
-		$xml = self::runCmd($cmd, FALSE);
+		$xml = $this->commandTask->runCmd($cmd, false);
 		$svnInfo = new SvnInfo($xml);
 		return $svnInfo->currentRevision;
 	}
 
 	/**
-	 * @param \Primat\Deployer\Entity\WorkingCopy $workingCopy
-	 * @return \Primat\Deployer\Entity\SvnInfo
+	 * @param string $path
+	 * @return \Primat\Deployer\Entity\Svn\SvnInfo
 	 */
-	public function getInfo(WorkingCopy $workingCopy)
+	public function getInfoByPath($path)
 	{
-		$cmd = $this->cmdSvn . " info {$workingCopy->dir->getPath()} --xml 2>&1";
-		$xml = self::runCmd($cmd, FALSE);
+		if (!is_dir($path)) {
+			return null;
+		}
+		$cmd = $this->cmdSvn . " info {$path} --xml 2>&1";
+
+		try {
+			$xml = $this->commandTask->runCmd($cmd, false);
+		}
+		catch (ExitStatusException $e) {
+			return null;
+		}
 		return new SvnInfo($xml);
 	}
 
@@ -381,7 +409,7 @@ class SvnTask
 			"--username {$workingCopy->account->username} " .
 			"--password {$workingCopy->account->password} " .
 			"--non-interactive --trust-server-cert --no-auth-cache 2>&1";
-		$output = self::runCmd($cmd, FALSE);
+		$output = $this->commandTask->runCmd($cmd, false);
 
 		// Parse the svn text into an array of folder names and sort them descending
 		$segments = self::getFolderSegmentsFromString($output);
@@ -393,7 +421,7 @@ class SvnTask
 				"--username {$workingCopy->account->username} " .
 				"--password {$workingCopy->account->password} " .
 				"--non-interactive --trust-server-cert --no-auth-cache 2>&1";
-			$output = self::runCmd($cmd, FALSE);
+			$output = $this->commandTask->runCmd($cmd, false);
 
 			// Parse the second level of relative folder names and sort
 			$segments2 = self::getFolderSegmentsFromString($output);
@@ -475,7 +503,7 @@ class SvnTask
 			"--username {$workingCopy->account->username} " .
 			"--password {$workingCopy->account->password} " .
 			" --xml -v --stop-on-copy --limit 40 --non-interactive --trust-server-cert --no-auth-cache 2>&1";
-		$xml = self::runCmd($cmd, FALSE);
+		$xml = $this->commandTask->runCmd($cmd, false);
 
 		// Parse the XML
 		$xmlObj = @simplexml_load_string($xml);
@@ -537,7 +565,7 @@ class SvnTask
 			" --password {$workingCopy->account->password}" .
 			" --xml --stop-on-copy --limit " . $logLimit .
 			" --non-interactive --trust-server-cert --no-auth-cache 2>&1";
-		$xml = self::runCmd($cmd, FALSE);
+		$xml = $this->commandTask->runCmd($cmd, false);
 
 		// Parse the XML
 		$xmlObj = @simplexml_load_string($xml);
@@ -560,26 +588,29 @@ class SvnTask
 	}
 
 	/**
-	 * @param RepositoryBranch $branch
+	 * @param SvnBranch $branch
 	 * @param int $maxEntries
 	 * @return array
-	 * @throws \Primat\Deployer\Exception
+	 * @throws TaskException
 	 */
-	public function getLatestLogEntries(RepositoryBranch $branch, $maxEntries = 40)
+	public function getLatestLogEntries(SvnBranch $branch, $maxEntries = 40)
 	{
-		$account = $branch->repository->account;
+		$account = $branch->repo->account;
 		$entries = array();
-		$cmd = $this->cmdSvn . " log {$branch->getUrl()}" .
-			" --username {$account->username}" .
-			" --password {$account->password}" .
-			" --limit $maxEntries" .
-			" --xml --non-interactive --trust-server-cert --no-auth-cache 2>&1";
-		$xml = $this->commandTask->runCmd($cmd, FALSE);
+
+		$authCmdString = '';
+		if (!empty($account)) {
+			$authCmdString = " --username {$account->username} --password {$account->password}  --non-interactive";
+		}
+
+		$cmd = $this->cmdSvn . " log {$branch->getUrl()}" . $authCmdString .
+			 " --limit $maxEntries --xml --trust-server-cert --no-auth-cache 2>&1";
+		$xml = $this->commandTask->runCmd($cmd, false);
 
 		// Parse the XML
 		$xmlObj = @simplexml_load_string($xml);
 		if (! $xmlObj) {
-			throw new Exception("Unable to unmarshall XML:\n" . $xml . "\n");
+			throw new TaskException("Unable to unmarshall XML:\n" . $xml . "\n");
 		}
 
 		foreach($xmlObj->logentry as $index => $entry) {
@@ -590,7 +621,6 @@ class SvnTask
 		}
 		return $entries;
 	}
-
 
 	/**
 	 * @param \Primat\Deployer\Entity\WorkingCopy $workingCopy
@@ -606,7 +636,7 @@ class SvnTask
 			"--username {$workingCopy->account->username} " .
 			"--password {$workingCopy->account->password} " .
 			" --xml --non-interactive --trust-server-cert --no-auth-cache 2>&1";
-		$xml = self::runCmd($cmd, FALSE);
+		$xml = $this->commandTask->runCmd($cmd, false);
 
 		// Parse the XML
 		$xmlObj = @simplexml_load_string($xml);
@@ -628,7 +658,7 @@ class SvnTask
 	 * Get an object representing information for a repository URL
 	 * @param \Primat\Deployer\Entity\WorkingCopy $workingCopy
 	 * @param int $revision
-	 * @return \Primat\Deployer\Entity\SvnInfo
+	 * @return \Primat\Deployer\Entity\Svn\SvnInfo
 	 */
 	public function getRepoInfo(WorkingCopy $workingCopy, $revision = 0)
 	{
@@ -637,19 +667,59 @@ class SvnTask
 			"--username {$workingCopy->account->username} " .
 			"--password {$workingCopy->account->password} " .
 			"--non-interactive --trust-server-cert --xml --no-auth-cache 2>&1";
-		$xml = self::runCmd($cmd, FALSE);
+		$xml = $this->commandTask->runCmd($cmd, false);
+		return new SvnInfo($xml);
+	}
+
+	/**
+	 * Get an object representing information for a repository URL
+	 * @param SvnBranch $branch
+	 * @param int $revision
+	 * @return \Primat\Deployer\Entity\Svn\SvnInfo
+	 */
+	public function getBranchInfo(SvnBranch $branch, $revision = 0)
+	{
+		$revisionParam = ($revision > 0) ? "@{$revision}" : '';
+		$cmd = $this->cmdSvn . " info " . $branch->getUrl() . $revisionParam . " " .
+			"--username {$branch->repo->account->username} " .
+			"--password {$branch->repo->account->password} " .
+			"--non-interactive --trust-server-cert --xml --no-auth-cache 2>&1";
+
+		try {
+
+		}
+		catch (Exception\CommandException $e) {
+
+		}
+
+		$xml = $this->commandTask->runCmd($cmd, false);
+
+
 		return new SvnInfo($xml);
 	}
 
 	/**
 	 *
 	 */
-	public function getRevision(WorkingCopy $workingCopy)
+	public function getRevision(SvnWorkingCopy $workingCopy)
 	{
-		if (! isset($workingCopy->info->commitRevision)) {
-			$workingCopy->info = self::getInfo($workingCopy);
+		if (!isset($workingCopy->getInfo()->commitRevision)) {
+			//$workingCopy->setInfo($this->getInfo($workingCopy));
 		}
-		return $workingCopy->info->commitRevision;
+		return $workingCopy->getInfo()->commitRevision;
+	}
+
+	/**
+	 *
+	 */
+	public function getWorkingCopyRevision($path)
+	{
+		$cmd = $this->cmdSvnVersion . " $path 2>&1";
+		$result = $this->commandTask->runCmd($cmd, false);
+		if (stripos($result, 'unversioned') !== false) {
+			return '';
+		}
+		return $result;
 	}
 
 	/**
@@ -664,7 +734,7 @@ class SvnTask
 			"--username {$workingCopy->account->username} " .
 			"--password {$workingCopy->account->password} " .
 			" --xml -v --stop-on-copy --non-interactive --trust-server-cert --no-auth-cache 2>&1";
-		$xml = self::runCmd($cmd, FALSE);
+		$xml = $this->commandTask->runCmd($cmd, false);
 
 		// Parse the XML
 		$xmlObj = @simplexml_load_string($xml);
@@ -739,17 +809,23 @@ class SvnTask
 	}
 
 	/**
-	 * @param WorkingCopy $workingCopy
+	 * @param SvnWorkingCopy $workingCopy
 	 * @throws Exception
 	 */
-	public function purgeIgnoredAndUnversioned($workingCopy)
+	public function purgeIgnoredAndUnversioned(SvnWorkingCopy $workingCopy)
 	{
+		$account = $workingCopy->branch->repo->account;
+		$authString = '';
+		if (!empty($account)) {
+			$authString =
+				"--username {$account->username} " .
+				"--password {$account->password} " .
+				"--non-interactive --trust-server-cert --no-auth-cache ";
+		}
+
 		// Remove unversioned and ignored files/folders
 		$this->outputTask->log("- Removing ignored and unversioned files and folders\n");
-		$cmd = $this->cmdSvn . " status --no-ignore " .
-			"--username {$workingCopy->account->username} " .
-			"--password {$workingCopy->account->password} " .
-			"--non-interactive --trust-server-cert --no-auth-cache {$workingCopy->dir->getPath()} 2>&1";
+		$cmd = $this->cmdSvn . " status --no-ignore " . $authString . $workingCopy->dir->getPath() . " 2>&1";
 		exec($cmd, $output, $err);
 		if ($err !== 0) {
 			throw new Exception("SVN deletion of ignored and unversioned files failed:\n\t".implode("\n\t", $output)."\n");
@@ -760,7 +836,7 @@ class SvnTask
 				$this->outputTask->log("Deleting {$file}\n");
 				if (file_exists($file)){
 					if (is_dir($file)) {
-						FileSystemTask::rrmdir($file);
+						$this->fileSystemTask->deleteFolder($file);
 					}
 					else {
 						unlink($file);
@@ -772,14 +848,14 @@ class SvnTask
 	}
 
 	/**
-	 * @param WorkingCopy $workingCopy
+	 * @param SvnWorkingCopy $workingCopy
 	 * @throws Exception
 	 */
 	public function revert($workingCopy)
 	{
-		$command = $this->cmdSvn . " revert -R {$workingCopy->dir->getPath()} 2>&1";
-		$this->outputTask->log("- Reverting changes\n");
-		self::runCmd($command);
+		$cmd = $this->cmdSvn . " revert -R {$workingCopy->dir->getPath()} 2>&1";
+		$this->outputTask->log("- Reverting working copy\n");
+		$this->commandTask->runCmd($cmd);
 		$this->outputTask->log("\n");
 	}
 
@@ -979,5 +1055,14 @@ class SvnTask
 			$externals[] = new SvnExternal((string)$node['path'], $path, $url, $revision);
 		}
 		return $externals;
+	}
+
+	/**
+	 * @param SvnBranch $branch
+	 * @return string
+	 */
+	protected function getCacheFolder(SvnBranch $branch)
+	{
+		return $this->cacheFolder . '/' . $branch->getId();
 	}
 }

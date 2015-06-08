@@ -5,7 +5,7 @@ use \Primat\Deployer\Entity;
 /**
  *
  */
-class Database
+class Database extends Entity
 {
 	/** @var string $dbName */
 	public $dbName;
@@ -23,7 +23,7 @@ class Database
 	 * @param Host $host
 	 * @param int $dbPort
 	 */
-	public function __construct($dbName, Account $account, Host $host = NULL, $dbPort = 3306)
+	public function __construct($dbName, Account $account, Host $host = null, $dbPort = 3306)
 	{
 		$this->dbName = $dbName;
 		$this->account = $account;

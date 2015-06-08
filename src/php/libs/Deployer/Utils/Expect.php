@@ -1,7 +1,6 @@
 <?php namespace Primat\Deployer\Utils;
 
 use \Primat\Deployer\Utils\Cygwin;
-use \Primat\Deployer\Config;
 
 /**
  * Class Expect
@@ -9,13 +8,33 @@ use \Primat\Deployer\Config;
  */
 class Expect
 {
+	/** @var string $srcPath */
+	protected $srcPath;
+	/** @var Cygwin $cygWin */
+	protected $cygwin;
+	/** @var string $expectCmd */
+	protected $expectCmd = 'expect';
+
+	/**
+	 * Constructor
+	 * @param string $srcPath
+	 * @param Cygwin $cygwin
+	 * @param string $expectCmd
+	 */
+	public function __construct($srcPath, Cygwin $cygwin, $expectCmd = 'expect')
+	{
+		$this->srcPath = $srcPath;
+		$this->cygwin = $cygwin;
+		$this->expectCmd = $expectCmd;
+	}
+
 	/**
 	 * Gets the Expect command template used in commands which would normally require a person to interactively enter
 	 * their (e.g. SSH) password
 	 * @return string
 	 */
-	public static function getCommandTemplate()
+	public function getPasswordCommandTemplate()
 	{
-		return Config::get('expect.bin') . ' ' . Cygwin::cygPath(BUILD_ROOT_DIR) . '/source/expect/pass.exp "%s" "%s"';
+		return $this->expectCmd . ' ' . $this->cygwin->cygPath($this->srcPath) . '/expect/pass.exp "%s" "%s"';
 	}
 }

@@ -4,7 +4,6 @@ use \Primat\Deployer\Task;
 use \Primat\Deployer\Exception;
 use \Primat\Deployer\Utils\Cygwin;
 use \Primat\Deployer\Utils\Expect;
-use \Primat\Deployer\Config;
 use \Primat\Deployer\Entity\RsyncOptions;
 
 /**
@@ -12,40 +11,77 @@ use \Primat\Deployer\Entity\RsyncOptions;
  */
 class FileSyncTask
 {
+	/**  @var \Primat\Deployer\Task\CommandTask $commandTask */
+	protected $commandTask;
+	/**  @var \Primat\Deployer\Utils\Cygwin $cygwin */
+	protected $cygwin;
+	/**  @var \Primat\Deployer\Utils\Expect $expect */
+	protected $expect;
+	/** @var bool $isCli */
+	protected $isCli;
+	/**  @var \Primat\Deployer\Task\OutputTask $outputTask */
+	protected $outputTask;
+	/** @var string $rsyncCmd */
+	protected $rsyncCmd = 'rsync';
+	/**  @var \Primat\Deployer\Task\SshTask $sshTask */
+	protected $sshTask;
+
+	/**
+	 * Constructor
+	 * @param Expect $expect
+	 * @param Cygwin $cygwin
+	 * @param CommandTask $commandTask
+	 * @param OutputTask $outputTask
+	 * @param SshTask $sshTask
+	 * @param bool $isCli
+	 * @param string $rsyncCmd
+	 */
+	public function __construct(Expect $expect, Cygwin $cygwin, OutputTask $outputTask, SshTask $sshTask,
+		CommandTask $commandTask, $isCli, $rsyncCmd = 'rsync')
+	{
+		$this->isCli = $isCli;
+		$this->expect = $expect;
+		$this->cygwin = $cygwin;
+		$this->commandTask = $commandTask;
+		$this->outputTask = $outputTask;
+		$this->sshTask = $sshTask;
+		$this->rsyncCmd = $rsyncCmd;
+	}
+
 	/**
 	 * Take a set of rsync options, build the command then run it
 	 * @param RsyncOptions $rsync
 	 */
-	public static function sync(RsyncOptions $rsync)
+	public function sync(RsyncOptions $rsync)
 	{
 		$remoteHost = $rsync->getRemoteHost();
 
-		if (empty($rsync->identityFilePath) && ! IS_CLI) {
+		if (empty($rsync->identityFilePath) && !$this->isCli) {
 			// No CLI and no identity means one must be generated temporarily
-			SshTask::GenerateTemporaryKeyPair($remoteHost);
+			$this->sshTask->GenerateTemporaryKeyPair($remoteHost);
 		}
 
-		$command = self::getRsyncCommand($rsync);
+		$command = $this->getRsyncCommand($rsync);
 
 		// Adjust the command if we are using expect
-		if (IS_CLI && ! empty($remoteHost)) { // IS_CLI &&
-			$cmdTemplate = Expect::getCommandTemplate();
+		if ($this->isCli && !empty($remoteHost)) { // IS_CLI &&
+			$cmdTemplate = $this->expect->getPasswordCommandTemplate();
 			$command = sprintf($cmdTemplate, addslashes($command), addslashes($remoteHost->account->password));
 		}
 		else {
-			self::log($command . "\n\n");
+			$this->outputTask->log($command . "\n\n");
 		}
 
-		self::runCmd($command);
-		self::log("\n\n");
+		$this->commandTask->runCmd($command);
+		$this->outputTask->log("\n\n");
 	}
 
 	/**
 	 *
 	 */
-	public static function getRsyncCommand(RsyncOptions $rsync)
+	public function getRsyncCommand(RsyncOptions $rsync)
 	{
-		$cmd = Config::get('rsync.bin');
+		$cmd = $this->rsyncCmd;
 
 		if (! empty($rsync->flags)) {
 			$cmd .= ' -' . $rsync->flags;
@@ -107,7 +143,7 @@ class FileSyncTask
 			$identity = '';
 			if ($rsync->useHostIdentity && ! empty($remoteHost->privateKeyPath)) {
 				// No CLI and no identity means a temporary SSL cert must be generated
-				$cmd .= ' -i ' . Cygwin::cygPath($remoteHost->privateKeyPath);
+				$cmd .= ' -i ' . $this->cygwin->cygPath($remoteHost->privateKeyPath);
 			}
 			if (! $rsync->sshStrictHostKeyChecking) {
 				$cmd .= ' -o StrictHostKeyChecking=no';
@@ -120,24 +156,15 @@ class FileSyncTask
 		if ($rsync->source->isRemote() && $rsync->useSsh) {
 			$cmd .= "{$rsync->source->getHost()->account->username}@{$rsync->source->getHost()->hostname}:";
 		}
-		$cmd .= Cygwin::cygPath($rsync->source->getPath());
+		$cmd .= $this->cygwin->cygPath($rsync->source->getPath());
 
 		// Continue building the command with the destination arg
 		$cmd .= ' ';
 		if ($rsync->destination->isRemote() && $rsync->useSsh) {
 			$cmd .= "{$rsync->destination->getHost()->account->username}@{$rsync->destination->getHost()->hostname}:";
 		}
-		$cmd .= Cygwin::cygPath($rsync->destination->getPath());
+		$cmd .= $this->cygwin->cygPath($rsync->destination->getPath());
 
 		return $cmd;
 	}
-
-	/**
-	 * Gets the Expect command tempalte the rsyn will run in to automate the interactive SSH password
-	 * @return string
-	 */
-//	private static function getExpectCommandTemplate()
-//	{
-//		return Config::get('expect.bin') . ' ' . Cygwin::cygPath(BUILD_ROOT_DIR) . '/source/expect/pass.exp "%s" "%s"';
-//	}
 }

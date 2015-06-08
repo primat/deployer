@@ -1,10 +1,11 @@
 <?php namespace Primat\Deployer\Entity;
 
 use Primat\Deployer\Entity;
+
 /**
  *
  */
-class Host
+class Host extends Entity
 {
 	/** @var \Primat\Deployer\Entity\Account $account */
 	public $account;

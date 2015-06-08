@@ -4,7 +4,8 @@
  * Date: 25/05/15
  */
 
-use Primat\Deployer\TaskCollection;
+use Primat\Deployer\Model\IScriptModel;
+use Primat\Deployer\Model\TaskModel;
 
 /**
  * Class ExecutionEnvironment
@@ -12,40 +13,40 @@ use Primat\Deployer\TaskCollection;
  */
 class ExecutionEnvironment
 {
-	/** @var string[] $context */
-	protected $context = [];
-	/** @var DeployerProject $project */
-	protected $project;
-	/** @var callable $script */
-	protected $script;
-	/** @var TaskCollection $tasks */
-	protected $tasks;
+	// The following properties should be protected but have been made public to remove errors in IDE type hinting in
+	// older versions of Phpstorm
+	/** @var array $scriptModel */
+	public $scriptModel;
+	/** @var string[] $settings */
+	public $settings = [];
+	/** @var TaskModel $task */
+	public $task;
 
 	/**
-	 * @param TaskCollection $tasks
+	 * @param TaskModel $tasks
+	 * @param IScriptModel $scriptModel
 	 * @param array $entities
-	 * @param array $context
-	 * @param callable $script
-	 * @param array $args
+	 * @param array $settings
 	 */
-	public function __construct(TaskCollection $tasks, array $entities, callable $script, array $context, array $args = [])
+	public function __construct(TaskModel $tasks, IScriptModel $scriptModel, array $entities, array $settings)
 	{
-		$this->tasks = $tasks;
+		$this->task = $tasks;
 		foreach ($entities as $key => $value){
 			$this->{$key} = $value;
 		}
-		$this->context = $context;
-		$this->script = $script;
-		$this->args = $args;
+		$this->settings = $settings;
+		$this->scriptModel = $scriptModel;
 	}
 
 	/**
-	 * @return mixed
+	 * @param $name
+	 * @param array $arguments
+	 * @return bool|mixed
 	 */
-	public function runScript()
+	public function callScript($name, $arguments = [])
 	{
-		$callback = $this->script;
-		$callback = $callback->bindTo($this, $this);
-		return call_user_func_array($callback, $this->args);
+		$script = $this->scriptModel->getScript($name);
+		$script = $script->bindTo($this, $this);
+		$script($arguments);
 	}
 }

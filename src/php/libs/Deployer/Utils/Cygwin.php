@@ -10,7 +10,7 @@ class Cygwin
 	 * @param $path
 	 * @return string
 	 */
-	public static function cygPath($path)
+	public function cygPath($path)
 	{
 		// Only affect Windows paths
 		if (preg_match('/^([A-Za-z]):/', $path, $matches) === 1) {

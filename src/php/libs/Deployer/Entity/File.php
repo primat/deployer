@@ -1,12 +1,13 @@
 <?php namespace Primat\Deployer\Entity;
 
-use \Primat\Deployer\Entity;
-use \Primat\Deployer\Entity\Dir;
+use Primat\Deployer\Entity;
+use Primat\Deployer\Entity\Dir;
+use Primat\Deployer\EntityInterface\IDirectoryFile;
 
 /**
  * This entity class represents a File
  */
-class File implements IDirectoryFile
+class File extends Entity implements IDirectoryFile
 {
 	/** @var Dir $dir The directory object corresponding to this File */
 	public $dir;

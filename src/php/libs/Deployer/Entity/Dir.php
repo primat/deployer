@@ -1,12 +1,13 @@
 <?php namespace Primat\Deployer\Entity;
 
-use \Primat\Deployer\Entity;
-use \Primat\Deployer\Entity\Host;
+use Primat\Deployer\Entity;
+use Primat\Deployer\Entity\Host;
+use Primat\Deployer\EntityInterface\IDirectoryFile;
 
 /**
  *
  */
-class Dir implements IDirectoryFile
+class Dir extends Entity implements IDirectoryFile
 {
 	/** @var Host $host The host object - Null if local */
 	public $host;
@@ -26,7 +27,7 @@ class Dir implements IDirectoryFile
 	 * @param $dirName
 	 * @param Host $host
 	 */
-	public function __construct($dirName, Host $host = NULL)
+	public function __construct($dirName, Host $host = null)
 	{
 		// Establish if the path is a windows path or not
 		$this->isWinDir = (mb_substr($dirName, 1, 1) === ':');
@@ -55,7 +56,7 @@ class Dir implements IDirectoryFile
 	 */
 	public function getHost()
 	{
-		return (empty($this->host)) ? NULL : $this->host;
+		return $this->host;
 	}
 
 	/**

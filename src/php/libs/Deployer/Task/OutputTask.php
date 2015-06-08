@@ -51,7 +51,7 @@ class OutputTask
     }
 
 	/**
-	 *
+	 * @param $startTime
 	 */
 	public function logElapsedTime($startTime)
 	{

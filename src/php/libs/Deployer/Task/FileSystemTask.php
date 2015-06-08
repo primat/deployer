@@ -1,6 +1,7 @@
 <?php namespace Primat\Deployer\Task;
 
 use Primat\Deployer\Exception;
+use Primat\Deployer\Exception\TaskException;
 
 /**
  *
@@ -8,11 +9,26 @@ use Primat\Deployer\Exception;
 class FileSystemTask
 {
 	/**
+	 * @param string $name
+	 * @param string $folder
+	 * @throws TaskException
+	 */
+	public function createFolder($folder, $name = '')
+	{
+		if (is_dir($folder)) {
+			return;
+		}
+		if (! mkdir($folder, 0777, true)) {
+			throw new TaskException("Error: Unable to create $name folder " . $folder);
+		}
+	}
+
+	/**
 	 * Recursively iterate through a directory and delete all files and folders
 	 * @param $dir
 	 * @param bool $deleteRootDir
 	 */
-	public static function rrmdir($dir, $deleteRootDir = TRUE)
+	public function deleteFolder($dir, $deleteRootDir = true)
 	{
 		$dir = rtrim($dir, '/\\');
 		if (is_dir($dir)) {
@@ -20,7 +36,7 @@ class FileSystemTask
 			foreach ($objects as $object) {
 				if ($object != "." && $object != "..") {
 					if (filetype($dir."/".$object) == "dir") {
-						self::rrmdir($dir."/".$object);
+						$this->deleteFolder($dir."/".$object);
 					}
 					else {
 						unlink($dir."/".$object);
@@ -33,20 +49,4 @@ class FileSystemTask
 			}
 		}
 	}
-
-	/**
-	 * @param $path
-	 * @return bool
-	 * @throws \Primat\Deployer\Exception
-	 */
-	public static function mkdir($path)
-    {
-        if (! is_dir($path)) {
-            mkdir($path);
-        }
-        if (! is_dir($path)) {
-			throw new Exception('Unable to create directory ' . $path);
-        }
-        return TRUE;
-    }
 }

@@ -4,32 +4,48 @@ use \Primat\Deployer\Entity\Host;
 use \Primat\Deployer\Entity\Database;
 use \Primat\Deployer\Entity\File;
 use \Primat\Deployer\Exception;
+use \Primat\Deployer\Exception\TaskException;
 use \Primat\Deployer\Task;
 
-require_once BUILD_ROOT_DIR . '/vendor/autoload.php';
-require_once BUILD_ROOT_DIR . '/vendor/phpseclib/phpseclib/phpseclib/Net/SFTP.php';
-require_once BUILD_ROOT_DIR . '/vendor/phpseclib/phpseclib/phpseclib/Crypt/RSA.php';
-
-define('NET_SFTP_LOGGING', NET_SFTP_LOG_COMPLEX); // NET_SFTP_LOG_COMPLEX or NET_SFTP_LOG_SIMPLE
-define('NET_SSH2_LOGGING', NET_SSH2_LOG_COMPLEX); // NET_SSH2_LOG_COMPLEX or NET_SSH2_LOG_SIMPLE
-
+//require_once BUILD_ROOT_DIR . '/vendor/autoload.php';
+//require_once BUILD_ROOT_DIR . '/vendor/phpseclib/phpseclib/phpseclib/Net/SFTP.php';
+//require_once BUILD_ROOT_DIR . '/vendor/phpseclib/phpseclib/phpseclib/Crypt/RSA.php';
+//
+//define('NET_SFTP_LOGGING', NET_SFTP_LOG_COMPLEX); // NET_SFTP_LOG_COMPLEX or NET_SFTP_LOG_SIMPLE
+//define('NET_SSH2_LOGGING', NET_SSH2_LOG_COMPLEX); // NET_SSH2_LOG_COMPLEX or NET_SSH2_LOG_SIMPLE
 
 /**
- *
+ * Class SshTask
+ * @package Primat\Deployer\Task
  */
 class SshTask
 {
 	const SSH_KEY_NAME = 'deployer-generated-key';
 
 	/** @var \Net_SFTP[] $handles An array of SSH connection handles */
-	public static $handles = array();
+	protected $handles = [];
+	/**  @var \Primat\Deployer\Task\OutputTask $outputTask */
+	protected $outputTask;
+	/**  @var string $tempFolder */
+	protected $tempFolder = '';
+
+	/**
+	 * Constructor
+	 * @param OutputTask $outputTask
+	 * @param string $tempFolder
+	 */
+	public function __construct(OutputTask $outputTask, $tempFolder)
+	{
+		$this->outputTask = $outputTask;
+		$this->tempFolder = $tempFolder;
+	}
 
 	/**
 	 * @param \Primat\Deployer\Entity\Host $host
 	 * @return \Net_SFTP
 	 * @throws \Primat\Deployer\Exception
 	 */
-	public static function connect(Host $host)
+	public function connect(Host $host)
 	{
 		// Throw an exception if no host is provided
 		if (empty($host)) {
@@ -37,9 +53,9 @@ class SshTask
 		}
 
 		// If the connection doesn't already exist, create it
-		if (empty(self::$handles[$host->hostname])) {
-			self::log("- Starting an SSH session on {$host->hostname} for user {$host->account->username}\n\n");
-			self::$handles[$host->hostname] = $handle = new \Net_SFTP($host->hostname);
+		if (empty($this->handles[$host->hostname])) {
+			$this->outputTask->log("- Starting an SSH session on {$host->hostname} for user {$host->account->username}\n\n");
+			$this->handles[$host->hostname] = $handle = new \Net_SFTP($host->hostname);
 			if (! $handle->login($host->account->username, $host->account->password)) {
 				throw new Exception(__METHOD__ . '() SSH connection failed');
 			}
@@ -49,7 +65,7 @@ class SshTask
 				$host->homeDirPath = $homeDirPath;
 			}
 		}
-		return self::$handles[$host->hostname];
+		return $this->handles[$host->hostname];
 	}
 
 	/**
@@ -58,24 +74,24 @@ class SshTask
 	 * @param $newPath
 	 * @throws \Primat\Deployer\Exception
 	 */
-	public static function copyFile(File $remoteFile, $newPath)
+	public function copyFile(File $remoteFile, $newPath)
 	{
-		self::exec($remoteFile->getHost(), "cp {$remoteFile->getPath()} {$newPath}");
+		$this->exec($remoteFile->getHost(), "cp {$remoteFile->getPath()} {$newPath}");
 	}
 
 	/**
 	 * Generate an SSH public / private key pair
 	 * @return array
 	 */
-	public static function generateKeyPair()
+	public function generateKeyPair()
 	{
-		$publickey = '';
-		$privatekey = '';
+		$publicKey = '';
+		$privateKey = '';
 		$rsa = new \Crypt_RSA();
 		$rsa->setPublicKeyFormat(CRYPT_RSA_PUBLIC_FORMAT_OPENSSH);
 		extract($rsa->createKey());
-		$publickey = str_replace('phpseclib-generated-key', self::SSH_KEY_NAME, $publickey);
-		return array($publickey, $privatekey);
+		$publicKey = str_replace('phpseclib-generated-key', self::SSH_KEY_NAME, $publicKey);
+		return array($publicKey, $privateKey);
 	}
 
 	/**
@@ -85,7 +101,7 @@ class SshTask
 	 */
 //	public static function getAuthorizedKeys(Host $remoteHost)
 //	{
-//		$sftp = self::connect($remoteHost);
+//		$sftp = $this->connect($remoteHost);
 //		$fileContents = $sftp->get("/home/{$remoteHost->account->username}/.ssh/authorized_keys");
 //		$fileContents = trim($fileContents);
 //		$lastError = trim($sftp->getLastSFTPError());
@@ -128,13 +144,13 @@ class SshTask
 	 * @param Host $remoteHost
 	 * @throws \Primat\Deployer\Exception
 	 */
-	public static function GenerateTemporaryKeyPair(Host $remoteHost)
+	public function GenerateTemporaryKeyPair(Host $remoteHost)
 	{
-		$sftp = self::connect($remoteHost);
+		$sftp = $this->connect($remoteHost);
 		$sshDir = "{$remoteHost->homeDirPath}/.ssh";
 
 		// Create the .ssh folder if it doesn't exist
-		if (! self::dirExists($sftp, $sshDir)) {
+		if (! $this->dirExists($sftp, $sshDir)) {
 			$sftp->mkdir($sshDir, 0700);
 			$lastError = trim($sftp->getLastSFTPError());
 			if (strlen($lastError)) {
@@ -153,10 +169,10 @@ class SshTask
 		}
 
 		// Produce the key pair
-		list($publicKey, $privateKey) = self::generateKeyPair();
+		list($publicKey, $privateKey) = $this->generateKeyPair();
 
 		// Clean up old keys and add the new one
-		$fileContents = self::removeTemporaryAuthorizedKeys($fileContents);
+		$fileContents = $this->removeTemporaryAuthorizedKeys($fileContents);
 		$fileContents .= $publicKey . "\n";
 		$cmdResult = $sftp->put($sshDir . "/authorized_keys", $fileContents);
 		if(! $cmdResult) {
@@ -170,7 +186,7 @@ class SshTask
 
 		$sftp->chmod(0644, $sshDir . "/authorized_keys");
 
-		$remoteHost->privateKeyPath = BUILD_TMP_DIR . '/.id_rsa_' .$remoteHost->hostname;
+		$remoteHost->privateKeyPath = $this->tempFolder . '/.id_rsa_' .$remoteHost->hostname;
 
 		// Copy the private key to a local temporary file
 		if(file_put_contents($remoteHost->privateKeyPath , $privateKey) === FALSE) {
@@ -182,7 +198,7 @@ class SshTask
 	 * @param $authorizedKeys
 	 * @return string
 	 */
-	protected static function removeTemporaryAuthorizedKeys($authorizedKeys)
+	protected function removeTemporaryAuthorizedKeys($authorizedKeys)
 	{
 		$result = '';
 		$lines = explode("\n", $authorizedKeys);
@@ -204,10 +220,10 @@ class SshTask
 	 * @param int $chmod
 	 * @throws \Primat\Deployer\Exception
 	 */
-	public static function uploadFile(File $localFile, File $remoteFile, $chmod = 0664)
+	public function uploadFile(File $localFile, File $remoteFile, $chmod = 0664)
 	{
-		$sftp = self::connect($remoteFile->getHost());
-		self::log("- Uploading $localFile->name to {$remoteFile->getHost()->hostname}:{$remoteFile->getPath()}\n");
+		$sftp = $this->connect($remoteFile->getHost());
+		$this->outputTask->log("- Uploading $localFile->name to {$remoteFile->getHost()->hostname}:{$remoteFile->getPath()}\n");
 		$res = $sftp->put($remoteFile->getPath(), $localFile->getPath(), NET_SFTP_LOCAL_FILE);
 		if (! $res || count($sftp->getSFTPErrors())) {
 			throw new Exception(__METHOD__ . "()\n\t" . implode("\n\t", $sftp->getSFTPErrors()));
@@ -216,7 +232,7 @@ class SshTask
 		if (! $res || count($sftp->getSFTPErrors())) {
 			throw new Exception(__METHOD__ . "()\n\t" . implode("\n\t", $sftp->getSFTPErrors()));
 		}
-		self::log("\n");
+		$this->outputTask->log("\n");
 	}
 
 	/**
@@ -225,15 +241,15 @@ class SshTask
 	 * @param $newPath
 	 * @throws \Primat\Deployer\Exception
 	 */
-	public static function moveFile(File $remoteFile, $newPath)
+	public function moveFile(File $remoteFile, $newPath)
 	{
-		$sftp = self::connect($remoteFile->getHost());
-		self::log("- Moving {$remoteFile->getPath()} to {$newPath}\n");
+		$sftp = $this->connect($remoteFile->getHost());
+		$this->outputTask->log("- Moving {$remoteFile->getPath()} to {$newPath}\n");
 		$res = $sftp->rename($remoteFile->getPath(), $newPath);
 		if (! $res || count($sftp->getSFTPErrors())) {
 			throw new Exception(__METHOD__ . "()\n\t" . implode("\n\t", $sftp->getSFTPErrors()));
 		}
-		self::log("\n");
+		$this->outputTask->log("\n");
 	}
 
 	/**
@@ -241,12 +257,12 @@ class SshTask
 	 * @param \Primat\Deployer\Entity\Database $db
 	 * @param string $dbName
 	 */
-	public static function importDb(File $localDumpFile, Database $db, $dbName)
+	public function importDb(File $localDumpFile, Database $db, $dbName)
 	{
 		$remoteFile = new File('/home/'.$db->host->account->username, $localDumpFile->name, $db->host);
-		self::uploadFile($localDumpFile, $remoteFile);
-		self::mysqlImport($remoteFile, $db, $dbName);
-		self::deleteFile($remoteFile);
+		$this->uploadFile($localDumpFile, $remoteFile);
+		$this->mysqlImport($remoteFile, $db, $dbName);
+		$this->deleteFile($remoteFile);
 	}
 
 	/**
@@ -257,31 +273,31 @@ class SshTask
 	 * @param $dbName
 	 * @throws \Primat\Deployer\Exception
 	 */
-	public static function mysqlImport(File $dumpFile, Database $db, $dbName)
+	public function mysqlImport(File $dumpFile, Database $db, $dbName)
 	{
-		self::log("- Importing {$dumpFile->name} into {$dbName}\n");
+		$this->outputTask->log("- Importing {$dumpFile->name} into {$dbName}\n");
 		$command = "mysql -u {$db->account->username} -p{$db->account->password} {$dbName} < {$dumpFile->getPath()}";
-		self::exec($db->getHost(), $command);
-		self::log("\n");
+		$this->exec($db->getHost(), $command);
+		$this->outputTask->log("\n");
 	}
 
 	/**
 	 * Delete a file on the remote Host
 	 * @param File $remoteFile
-	 * @throws \Primat\Deployer\Exception
+	 * @throws TaskException
 	 */
-	public static function deleteFile(File $remoteFile)
+	public function deleteFile(File $remoteFile)
 	{
 		// Make sure there is a connection open
-		$ssh = self::connect($remoteFile->getHost());
+		$ssh = $this->connect($remoteFile->getHost());
 
-		self::log("- Deleting file " . $remoteFile->getPath() . "\n");
+		$this->outputTask->log("- Deleting file " . $remoteFile->getPath() . "\n");
 		$res = $ssh->delete($remoteFile->getPath());
 		if (! $res || count($ssh->getSFTPErrors())) {
-			throw new Exception(__METHOD__ . "() - File deletion failed: \n\t" .
+			throw new TaskException(__METHOD__ . "() - File deletion failed: \n\t" .
 				implode("\n\t", $ssh->getSFTPErrors()));
 		}
-		self::log("\n");
+		$this->outputTask->log("\n");
 	}
 
 	/**
@@ -291,25 +307,25 @@ class SshTask
 	 * @param bool $printOutput Whether or not to display the output from the command
 	 * @throws \Primat\Deployer\Exception
 	 */
-	public static function exec(Host $host, $command, $printOutput = TRUE)
+	public function exec(Host $host, $command, $printOutput = TRUE)
 	{
 		// Make sure there is a connection open
-		$ssh = self::connect($host);
+		$ssh = $this->connect($host);
 
 		// log the command
-		//self::log("{$host->account->username}@{$host->hostname}: $command\n");
+		//$this->outputTask->log("{$host->account->username}@{$host->hostname}: $command\n");
 
 		// Execute the command
 		if ($printOutput) {
 			$ssh->exec($command, function($str) {
-				SshTask::log($str);
+					$this->outputTask->log($str);
 			});
-			self::log("\n");
+			$this->outputTask->log("\n");
 		}
 		else {
 			$ssh->exec($command);
 		}
-		self::checkCmdExceptions($ssh);
+		$this->checkCmdExceptions($ssh);
 	}
 
 	/**
@@ -318,11 +334,11 @@ class SshTask
 	 * @param string $path The directory to test for existence
 	 * @return bool TRUE if the directory exists, FALSE otherwise
 	 */
-	public static function dirExists(\Net_SSH2 $ssh, $path)
+	public function dirExists(\Net_SSH2 $ssh, $path)
 	{
 		$command = '[ -d ' . $path . ' ] && echo "1" || echo "0"';
 		$output = trim($ssh->exec($command));
-		self::checkCmdExceptions($ssh);
+		$this->checkCmdExceptions($ssh);
 		return $output === "1";
 	}
 
@@ -331,34 +347,34 @@ class SshTask
 	 * @param \Primat\Deployer\Entity\File $file
 	 * @return bool
 	 */
-	public static function fileExists(File $file)
+	public function fileExists(File $file)
 	{
 		// Make sure there is a connection
-		if (! $file->isRemote()) {
+		if (!$file->isRemote()) {
 			echo "Warning: Testing for file existence on local machine rather than a remote one";
 			return file_exists($file->getPath());
 		}
 
 		$command = '[ -f ' . $file->getPath() . ' ] && echo "1" || echo "0"';
-		$ssh = self::connect($file->getHost());
+		$ssh = $this->connect($file->getHost());
 		$output = trim($ssh->exec($command));
-		self::checkCmdExceptions($ssh);
+		$this->checkCmdExceptions($ssh);
 		return $output === "1";
 	}
 
 	/**
 	 * Run this method after executing a command to detect errors
 	 * @param \Net_SSH2 $handle
-	 * @throws \Primat\Deployer\Exception
+	 * @throws TaskException
 	 */
-	protected static function checkCmdExceptions(\Net_SSH2 $handle)
+	protected function checkCmdExceptions(\Net_SSH2 $handle)
 	{
 		if ($handle->getExitStatus() > 0) {
-			throw new Exception("Command failed with exit status ".$handle->getExitStatus()."\n\t" .
+			throw new TaskException("Command failed with exit status ".$handle->getExitStatus()."\n\t" .
 				implode("\n\t", $handle->getErrors()));
 		}
 		else if (count($handle->getErrors())) {
-			throw new Exception(__CLASS__ . ": Command failed.\n\t" . implode("\n\t", $handle->getErrors()));
+			throw new TaskException(__CLASS__ . ": Command failed.\n\t" . implode("\n\t", $handle->getErrors()));
 		}
 	}
 }

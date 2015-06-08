@@ -1,14 +1,14 @@
 <?php namespace Primat\Deployer\Entity;
 
+use \Primat\Deployer\Entity;
 use \Primat\Deployer\Entity\Dir;
 use \Primat\Deployer\Utils\Cygwin;
-
 
 /**
  * Class Rsync
  * @package Primat\Deployer\Entity\Command
  */
-class RsyncOptions
+class RsyncOptions extends Entity
 {
 	/** @var string $chmod */
 	public $chmod = 'Du=rwx,Dg=rwx,Do=rx,Fu=rw,Fg=rw,Fo=r';

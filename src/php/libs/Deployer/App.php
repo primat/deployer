@@ -1,15 +1,11 @@
 <?php namespace Primat\Deployer;
 
 use Primat\Deployer\Exception;
+use Primat\Deployer\Model\FileEntityModel;
+use Primat\Deployer\Model\FileScriptModel;
+use Primat\Deployer\Model\FileScriptConfigModel;
+use Primat\Deployer\Model\TaskModel;
 use Primat\Deployer\Service\Logging\FileLogger;
-use Primat\Deployer\Service\Logging\ConsoleLogger;
-use Primat\Deployer\Service\Logging\HtmlLogger;
-use Primat\Deployer\Task\CliTask;
-use Primat\Deployer\Task\CommandTask;
-use Primat\Deployer\Task\OutputTask;
-use Primat\Deployer\Task\SvnTask;
-use Primat\Deployer\Task\ViewTask;
-use Primat\Deployer\Task\EmailTask;
 
 /**
  * Class App
@@ -18,181 +14,130 @@ class App
 {
 	/** @var int $appStartTime */
 	protected $appStartTime;
-	/** @var $currentProject \Primat\Deployer\DeployerProject */
-	protected $currentProject;
-	/** @var $currentScript \Primat\Deployer\DeployerScript */
-	protected $currentScript;
+	/** @var string $baseFolder */
+	protected $baseFolder;
+	/** @var string $cacheFolder */
+	protected $cacheFolder;
+	/** @var FileEntityModel $entityModel */
+	protected $entityModel;
+	/** @var TaskModel $taskModel */
+	protected $taskModel;
 	/** @var $isCli bool */
 	protected $isCli = true;
-	/** @var $settings string[] */
-	protected $settings = [
-		'output.scriptTitle'=> true,
-		'output.scriptDuration'=> true,
-		'log.enable'  => true,
-		'log.distinct'  => false,
-		'cmd.bash' => 'bash',
-		'cmd.mintty' => 'mintty',
-		'cmd.expect' => 'expect',
-		'cmd.rsync' => 'rsync',
-		'cmd.svn' => 'svn',
-		'cmd.mysql' => 'mysql',
-		'cmd.mysqldump' => 'mysqldump'
-	];
-	/** @var\Primat\Deployer\Task\OutputTask $outputTask */
-	protected $outputTask;
+	/** @var $outputScriptDuration bool */
+	protected $outputScriptDuration = false;
+	/** @var FileScriptConfigModel $scriptConfigModel */
+	protected $scriptConfigModel;
+	/** @var FileScriptModel $scriptModel */
+	protected $scriptModel;
+	/** @var string $tempFolder */
+	protected $tempFolder;
 
 	/**
 	 * Constructor - Initialize the app
 	 */
 	public function __construct()
 	{
+		// Absolute start time
 		$this->appStartTime = time();
+		$this->baseFolder = $this->getBaseFolder();
+		$this->cacheFolder = $this->baseFolder . '/cache';
+		$this->tempFolder = $this->baseFolder . '/temp';
 		$this->isCli = substr(php_sapi_name(), 0, 3) === 'cli';
-
-		// Initialize output control
-		if ($this->isCli) {
-			$this->outputTask = new OutputTask(new ConsoleLogger());
-		}
-		else {
-			$this->outputTask = new OutputTask(new HtmlLogger());
-		}
 
 		// Register some handlers
 		set_exception_handler(array($this, 'exceptionHandlerCallback'));
 		set_error_handler(array($this, 'errorHandlerCallback'));
 		register_shutdown_function(array($this, 'shutDownCallback'));
 
-		$projectName = '';
-		$projectNameCustom = '';
-		$scriptName = '';
-		$scriptClassName = '';
-		$args = [];
-
         // Perform CLI or HTTP specific actions
         if ($this->isCli) {
-            if ($_SERVER['argc'] < 3) {
-				$this->outputTask->log('Usage: php ' . $_SERVER['argv'][0] . ' <Project> <Script> [param1 param2 ...]');
-                exit;
+            if ($_SERVER['argc'] < 2) {
+				throw new Exception('Usage: php ' . $_SERVER['argv'][0] . ' <script> [param1 param2 ...]');
             }
 			// Establish the controller and method to call
-			$projectName = $_SERVER['argv'][1];
-			$projectNameCustom = $projectName . 'Custom';
-			$scriptName = (isset($_SERVER['argv'][2])) ? $_SERVER['argv'][2] : 'index';
-			$scriptClassName = '\\' . $projectName . '\\' . $scriptName;
-			$args = array_slice($_SERVER['argv'], 2);
+			$scriptConfigId = $_SERVER['argv'][1];
+			$scriptArgs = array_slice($_SERVER['argv'], 2);
         }
         else {
-			// TODO: Implement Web interface
 			throw new Exception('Error: Web interface not yet implemented.');
             //$this->enableOutputFlush();
         }
 
-		/// Test to make sure the requested project and script exist
-		if (!class_exists($projectNameCustom)) {
-			$projectNameCustom = $projectName;
-		}
-		if (!class_exists($projectName)) {
-			throw new Exception('Error: Class ' . $projectName . " does not exist.");
-		}
-		if (!class_exists($scriptClassName)) {
-			throw new Exception('Error: Script ' . $scriptClassName . " does not exist.");
-		}
+		// Create the models
+		$this->taskModel = new TaskModel($this->getSrcFolder(), $this->baseFolder, $this->cacheFolder,
+			$this->tempFolder, $this->isCli);
+		$this->entityModel = new FileEntityModel($this->baseFolder);
+		$this->scriptConfigModel = new FileScriptConfigModel($this->baseFolder, $this->entityModel);
+		$this->scriptModel = new FileScriptModel($this->baseFolder);
 
-		$this->initScript($projectName, $projectNameCustom, $scriptName, $scriptClassName, $args);
+		$this->initScript($scriptConfigId, $scriptArgs);
 	}
 
 	/**
-	 * @param $projectName
-	 * @param $projectNameCustom
-	 * @param $scriptName
-	 * @param $scriptClassName
-	 * @param $args
-	 * @throws Exception
+	 * @param $errno
+	 * @param $errstr
+	 * @param $errfile
+	 * @param $errline
+	 * @return bool
 	 */
-	public function initScript($projectName, $projectNameCustom, $scriptName, $scriptClassName, $args)
+	public function errorHandlerCallback($errno, $errstr, $errfile, $errline)
 	{
-		/** @var $project DeployerProject */
-		$project = new $projectNameCustom();
-		/** @var $script DeployerScript */
-		$script = new $scriptClassName();
+//		if (!(error_reporting() & $errno)) {
+//			// This error code is not included in error_reporting
+//			return true;
+//		}
+//
+//		switch ($errno) {
+//			case E_USER_ERROR:
+//				$str = "ERROR: [$errno] $errstr\n";
+//				$str .= "  Fatal error on line $errline in file $errfile";
+//				$str .= ", PHP " . PHP_VERSION . " (" . PHP_OS . ")\n";
+//				$this->taskModel->output->logException($str . "\n");
+//				exit(1);
+//				break;
+//
+//			case E_USER_WARNING:
+//				$this->taskModel->output->log("WARNING: [$errno] $errstr\nError on line $errline in file $errfile\n");
+//				break;
+//
+//			case E_USER_NOTICE:
+//				$this->taskModel->output->log("NOTICE: [$errno] $errstr\nError on line $errline in file $errfile\n");
+//				break;
+//
+//			default:
+//				$this->taskModel->output->log("UNKNOWN: [$errno] $errstr\nError on line $errline in file $errfile\n");
+//				break;
+//		}
 
-		// Combine settings from the project script and default app settings
-		$scriptSettings = $project->getScriptSettings($scriptName);
-		$scriptSettings += $script->getSettings();
-		$scriptSettings += $project->getSettings();
-		$scriptSettings += $this->settings;
+		// Don't execute PHP internal error handler
+		//return true;
+		return false;
+	}
 
-		$entities = $project->getScriptEntities($scriptName);
-
-		// The context is the run-time settings
-		$context = $scriptSettings;
-		$context['appStartTime'] = $this->appStartTime;
-		$context['scriptStartTime'] = time();
-		$context['dateTimeSlug'] = date('Y-m-d_H-i-s', $context['scriptStartTime']);
-		$context['scriptName'] = $script->getName();
-		$context['isCli'] = $this->isCli;
-		$context['projectFolder'] = $project->getFolder();
-		$context['projectName'] = $project->getName();
-
-		if (! is_dir($context['projectFolder'])) {
-			if (! mkdir($context['projectFolder'], 0777, true)) {
-				throw new Exception('Error: Unable to create project folder ' . $context['projectFolder']);
-			}
+	/**
+	 * This method is designed to handle un caught exceptions so it should be registered with set_exception_handler()
+	 * @param \Exception $e
+	 */
+	public function exceptionHandlerCallback(\Exception $e)
+	{
+		if ($e instanceof Exception) {
+			$this->taskModel->output->logException($e->getMessage());
+			//$this->taskModel->output->logException($e->getMessage() . "\n" . $e->getTraceAsString());
 		}
-
-		$context['projectLogsFolder'] = $context['projectFolder'] . '/logs';
-		if (! is_dir($context['projectLogsFolder'])) {
-			if (! mkdir($context['projectLogsFolder'], 0777, true)) {
-				throw new Exception('Error: Unable to create logs folder ' . $context['projectLogsFolder']);
-			}
+		else {
+			$this->taskModel->output->logException($e->getMessage());
+			//$this->taskModel->output->logException($e->getMessage() . "\n" . $e->getTraceAsString());
 		}
+		exit;
+	}
 
-		$context['projectCacheFolder'] = $context['projectFolder'] . '/cache';
-		// Test if folder exists
-		if (! is_dir($context['projectCacheFolder'])) {
-			if (! mkdir($context['projectCacheFolder'], 0777, true)) {
-				throw new Exception('Error: Unable to create working copies cache folder ' . $context['projectCacheFolder']);
-			}
-		}
-
-		$context['projectTempFolder'] = $context['projectFolder'] . '/temp';
-		// Test if folder exists
-		if (! is_dir($context['projectTempFolder'])) {
-			if (! mkdir($context['projectTempFolder'], 0777, true)) {
-				throw new Exception('Error: Unable to create temporary folder ' . $context['projectTempFolder']);
-			}
-		}
-
-		$context['logFile'] = '';
-		if (isset($context['log.enable']) && $context['log.enable'] == true) {
-			$context['logFile'] = $context['projectLogsFolder'] . '/' . $projectName . '-' . $scriptName;
-			if (isset($context['log.distinct']) && $context['log.distinct'] == true) {
-				$context['logFile'] .= '_' . $context['dateTimeSlug'];
-			}
-			$context['logFile'] .= '.txt';
-		}
-
-		// Add a file logger to the output, if desired
-		if (strlen($context['logFile'])) {
-			$this->outputTask->addLogger(new FileLogger($context['logFile']));
-		}
-
-		$tasks = new TaskCollection();
-		$tasks->outputTask = $this->outputTask;
-		$tasks->cliTask = new CliTask($tasks->outputTask);
-		$tasks->commandTask = new CommandTask($tasks->outputTask);
-		$tasks->svnTask = new SvnTask($tasks->outputTask, $tasks->commandTask, $context['cmd.svn']);
-		$tasks->viewTask = new ViewTask($context['projectFolder']);
-		$tasks->emailTask = new EmailTask($tasks->outputTask);
-
-		$execEnv = new ExecutionEnvironment($tasks, $entities, $script->getScriptClosure(), $context, $args);
-
-		// Output the script title, if desired
-		if ($context['output.scriptTitle'] === true) {
-			$tasks->outputTask->logScriptHeading($script->getName());
-		}
-
-		$execEnv->runScript();
+	/**
+	 *
+	 */
+	public function shutDownCallback()
+	{
+		$this->taskModel->output->logElapsedTime($this->appStartTime);
 	}
 
 	/**
@@ -208,61 +153,92 @@ class App
 	}
 
 	/**
-	 * @param $errno
-	 * @param $errstr
-	 * @param $errfile
-	 * @param $errline
-	 * @return bool
+	 * @return string
+	 * @throws \RuntimeException
 	 */
-	public function errorHandlerCallback($errno, $errstr, $errfile, $errline)
+	protected function getBaseFolder()
 	{
-		if (!(error_reporting() & $errno)) {
-			// This error code is not included in error_reporting
-			return true;
+		$realPath = realpath($_SERVER['SCRIPT_NAME']);
+		if ($realPath) {
+			return dirname($realPath);
 		}
-
-		switch ($errno) {
-			case E_USER_ERROR:
-				$str = "ERROR: [$errno] $errstr\n";
-				$str .= "  Fatal error on line $errline in file $errfile";
-				$str .= ", PHP " . PHP_VERSION . " (" . PHP_OS . ")\n";
-				$this->outputTask->logException($str . "\n");
-				exit(1);
-				break;
-
-			case E_USER_WARNING:
-				$this->outputTask->log("WARNING: [$errno] $errstr\nError on line $errline in file $errfile\n");
-				break;
-
-			case E_USER_NOTICE:
-				$this->outputTask->log("NOTICE: [$errno] $errstr\nError on line $errline in file $errfile\n");
-				break;
-
-			default:
-				$this->outputTask->log("UNKNOWN: [$errno] $errstr\nError on line $errline in file $errfile\n");
-				break;
-		}
-
-		// Don't execute PHP internal error handler
-		//return true;
-		return false;
+		throw new \RuntimeException("Cannot establish the project's base folder");
 	}
 
 	/**
-	 * This method is designed to handle un caught exceptions so it should be registered with set_exception_handler()
-	 * @param \Exception $e
+	 * @return string
+	 * @throws \RuntimeException
 	 */
-	public function exceptionHandlerCallback($e)
+	protected function getSrcFolder()
 	{
-		$this->outputTask->logException($e->getMessage());
-		exit;
+		$realPath = realpath(__DIR__ . '/../../../');
+		if ($realPath) {
+			return $realPath;
+		}
+		throw new \RuntimeException("Cannot establish the application's source folder");
 	}
 
 	/**
-	 *
+	 * @param $configId
+	 * @param $args
+	 * @throws Exception
 	 */
-	public function shutDownCallback()
+	protected function initScript($configId, $args)
 	{
-		$this->outputTask->logElapsedTime($this->appStartTime);
+		$defaultSettings = [
+			'output.scriptTitle'=> true,
+			'output.scriptDuration'=> true,
+			'log.enable'  => true,
+			'log.distinct'  => false,
+		];
+
+		// Get the script configuration
+		$scriptConfig = $this->scriptConfigModel->getScriptConfig($configId);
+
+		// The context is the run-time settings - the combined settings of the script config and the app defaults
+		$settings = $scriptConfig->getSettings() + $defaultSettings;
+		$this->outputScriptDuration = $settings['output.scriptDuration'];
+		$settings['appStartTime'] = $this->appStartTime;
+		$settings['dateTimeSlug'] = date('Y-m-d_H-i-s', $this->appStartTime);
+		$settings['isCli'] = $this->isCli;
+		$settings['projectFolder'] = $this->baseFolder;
+		$settings['projectLogsFolder'] = $this->baseFolder . '/logs';
+		$settings['projectCacheFolder'] = $this->cacheFolder;
+		$settings['projectTempFolder'] = $this->baseFolder . '/temp';
+		$settings['scriptName'] = $scriptConfig->getTitle();
+
+		// Create project folders
+		$this->taskModel->fileSystem->createFolder($this->baseFolder, 'project');
+		$this->taskModel->fileSystem->createFolder($settings['projectLogsFolder'], 'logs');
+		$this->taskModel->fileSystem->createFolder($this->cacheFolder, 'cache');
+		$this->taskModel->fileSystem->createFolder($settings['projectTempFolder'], 'temporary');
+
+		// Add a file logger
+		$settings['logFile'] = '';
+		if (isset($settings['log.enable']) && $settings['log.enable'] == true) {
+			$settings['logFile'] = $settings['projectLogsFolder'] . '/' . $configId;
+			if (isset($settings['log.distinct']) && $settings['log.distinct'] == true) {
+				$settings['logFile'] .= '_' . $settings['dateTimeSlug'];
+			}
+			$settings['logFile'] .= '.txt';
+		}
+
+		// Add a file logger to the output, if required
+		if (strlen($settings['logFile'])) {
+			$this->taskModel->output->addLogger(new FileLogger($settings['logFile']));
+		}
+
+		$entities = $scriptConfig->getEntities();
+
+		$settings['scriptStartTime'] = time();
+		$execEnv = new ExecutionEnvironment($this->taskModel, $this->scriptModel, $entities, $settings);
+
+		// Output the script title, if desired
+		if ($settings['output.scriptTitle'] === true) {
+			$this->taskModel->output->logScriptHeading($scriptConfig->getTitle());
+		}
+
+		// Run the script!
+		$execEnv->callScript($configId, $args);
 	}
 }

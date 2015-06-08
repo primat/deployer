@@ -3,7 +3,7 @@
 /**
  *
  */
-class Connector
+abstract class Connector
 {
 
 }

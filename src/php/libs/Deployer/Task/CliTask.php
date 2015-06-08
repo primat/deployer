@@ -160,20 +160,22 @@ class CliTask
 
 	/**
 	 * Prompt the user to select a repository to sync
+	 * @param \Primat\Deployer\Entity[] $list
 	 * @param string $promptText
-	 * @return \Primat\Deployer\Entity\WorkingCopy
+	 * @return \Primat\Deployer\Entity\Svn\SvnBranch
 	 */
-	public function promptRepo($promptText = 'Choose a repository to sync:')
+	public function promptSvnBranch($list, $promptText = 'Choose a branch to sync:')
 	{
 		$choices = array();
-		$workingCopies = Entity::getList('WorkingCopy');
+		$branchList = $list;
 		$mapping = array();
-		foreach($workingCopies as $index => $workingCopy) {
-			/** @var $workingCopy \Primat\Deployer\Entity\WorkingCopy */
-				$mapping[] = $workingCopy;
-				$choices[] = $workingCopy->repoUrl;
+		foreach($branchList as $index => $branch) {
+			/** @var $branch \Primat\Deployer\Entity\Svn\SvnBranch */
+			$mapping[] = $branch;
+			$choices[] = $branch->uri;
 		}
 		$selection = CliTask::promptMultipleChoice($choices, $promptText);
+		$this->outputTask->log("You chose " . $mapping[$selection]->uri . "\n\n");
 		return $mapping[$selection];
 	}
 
@@ -186,9 +188,6 @@ class CliTask
 	public function promptDir(array $dirs, $promptText = 'Choose a remote directory:')
 	{
 		$choices = array();
-		if (empty($dirs)) {
-			$dirs = Entity::getList('Dir');
-		}
 		foreach($dirs as $index => $dir) {
 			/** @var $dir \Primat\Deployer\Entity\Dir */
 			$displayString = $dir->getPath();
@@ -198,6 +197,7 @@ class CliTask
 			$choices[] = $displayString;
 		}
 		$selection = CliTask::promptMultipleChoice($choices, $promptText);
+		$this->outputTask->log("You chose " . $dirs[$selection]->getPath() . "\n\n");
 		return $dirs[$selection];
 	}
 

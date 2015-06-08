@@ -1,10 +1,11 @@
 <?php namespace Primat\Deployer\Entity;
 
 use Primat\Deployer\Entity;
+
 /**
  *
  */
-class Account
+class Account extends Entity
 {
 	public $username;
 	public $password;

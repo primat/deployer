@@ -3,51 +3,55 @@
 use \Primat\Deployer\Entity\Email;
 use \Primat\Deployer\Entity\Email\Connector;
 use \Primat\Deployer\Entity\Email\SmtpConnector;
-use \Primat\Deployer\Exception;
+use \Primat\Deployer\Exception\TaskException;
 
 /**
- * The email task takes care of sending emails
+ * The email task class takes care of sending emails
  */
 class EmailTask
 {
-	protected $mailer;
-
-	/**  @var $viewTask \Primat\Deployer\Task\OutputTask */
+	/** @var bool $debugLevel */
+	protected $debugLevel = 0;
+	/**  @var bool $isCli */
+	protected $isCli;
+	/**  @var \Primat\Deployer\Task\OutputTask $outputTask */
 	protected $outputTask;
 
 	/**
 	 * Constructor
 	 * @param OutputTask $outputTask
+	 * @param bool $isCli
 	 */
-	public function __construct(OutputTask $outputTask)
+	public function __construct(OutputTask $outputTask, $isCli)
 	{
 		$this->outputTask = $outputTask;
+		$this->isCli = $isCli;
 	}
 
-//	/**
-//	 * A basic PHP mail() wrapper
-//	 * @param $sendToList
-//	 * @param $subject
-//	 * @param $body
-//	 * @param array $headers
-//	 * @throws \Primat\Deployer\Exception
-//	 */
-//	public function send($sendToList, $subject, $body, $headers = array())
-//	{
-//		echo "-- Sending email notifications...\n";
-//		$headers =  implode("\r\n", $headers). "\r\n";
-//		$result = mail($sendToList, $subject, $body, $headers);
-//		if (! $result) {
-//			throw new Exception('Email notifications failed');
-//		}
-//		echo "-- Email notifications sent successfully\n";
-//	}
+	/**
+	 * A basic PHP mail() wrapper
+	 * @param $sendToList
+	 * @param $subject
+	 * @param $body
+	 * @param array $headers
+	 * @throws TaskException
+	 */
+	public function send($sendToList, $subject, $body, $headers = array())
+	{
+		$this->outputTask->log("-- Sending email notifications...\n");
+		$headers =  implode("\r\n", $headers). "\r\n";
+		$result = mail($sendToList, $subject, $body, $headers);
+		if (! $result) {
+			throw new TaskException('Email notifications failed');
+		}
+		$this->outputTask->log("-- Email notifications sent successfully\n");
+	}
 
 	/**
 	 * Send an email using PHPMailer
-	 * @param \Primat\Deployer\Entity\Email\Connector $connector
-	 * @param \Primat\Deployer\Entity\Email $emailData
-	 * @throws \Primat\Deployer\Exception
+	 * @param Connector $connector
+	 * @param Email $emailData
+	 * @throws TaskException
 	 */
 	public function sendEmail(Connector $connector, Email $emailData)
 	{
@@ -62,26 +66,31 @@ class EmailTask
 			// 0 = off (for production use)
 			// 1 = client messages
 			// 2 = client and server messages
-			$mail->SMTPDebug = 0;
+			$mail->SMTPDebug = $this->debugLevel;
 			//Ask for HTML-friendly debug output
-			$mail->Debugoutput = 'html';
+			$mail->Debugoutput = $this->isCli ? 'html' : 'echo';
 			//Set the hostname of the mail server
 			$mail->Host = $connector->host->getHostname();
 			//Set the SMTP port number - likely to be 25, 465 or 587
 			$mail->Port = $connector->port;
 			//Whether to use SMTP authentication
-			$mail->SMTPAuth = false;
+			$mail->SMTPAuth = $connector->auth;
 			// SMTP auth is currently unsupported
-			// if ($connector->auth) { }
+			if ($connector->auth) {
+				$mail->Username = $connector->host->getAccount()->username;
+				$mail->Password = $connector->host->getAccount()->password;
+				$mail->SMTPSecure = $connector->secure;
+				//$mail->Port = $connector->port;
+			}
 		}
 		else {
-			throw new Exception("EmailTask error: Unsupported email connector");
+			throw new TaskException("Unsupported email connector");
 		}
 
-		// Set the FRom address and name
+		// Set the From address and name
 		$mail->setFrom($emailData->fromAddress, $emailData->fromName);
 
-		//Set a reply-to address, if there is one
+		//Set a Reply-to address, if there is one
 		if (! empty($emailData->replyAddress)) {
 			$mail->addReplyTo($emailData->replyAddress, $emailData->replyName);
 		}
@@ -109,34 +118,24 @@ class EmailTask
 			$this->outputTask->log("Email notification" . ($multipleRecipients ? 's' : '') . " sent\n\n");
 		}
 		else {
-			throw new Exception("Mailer Error: " . $mail->ErrorInfo);
+			throw new TaskException("Mailer error: " . $mail->ErrorInfo);
 		}
 	}
 
 	/**
-	 * Method for creating emails as files and storing them in a sub folder of the currently running script
-	 * @param $fileBaseName
-	 * @param $html
-	 * @param $text
-	 * @throws \Exception
+	 * Sets the debug level when sending emails
+	 * @param int $level
 	 */
-	public function createEmailFiles($fileBaseName, $html, $text)
+	public function setDebugLevel($level)
 	{
-		if (! is_dir(BUILD_EMAILS_DIR)) {
-			mkdir(BUILD_EMAILS_DIR);
+		if ($level < 0) {
+			$this->debugLevel = 0;
 		}
-		if (! is_dir(BUILD_EMAILS_DIR)) {
-			throw new \Exception('Unable to create folder for storing email files');
+		else if ($level > 2) {
+			$this->debugLevel = 2;
 		}
-
-		$basePath = BUILD_EMAILS_DIR . '/' . $fileBaseName;
-
-		// Store the email contents in files
-		if (! file_put_contents($basePath . '.txt', $text)) {
-			throw new \Exception('Unable to create email text file');
-		}
-		if (! file_put_contents($basePath . '.html', $html)) {
-			throw new \Exception('Unable to create email HTML file');
+		else {
+			$this->debugLevel = $level;
 		}
 	}
 }

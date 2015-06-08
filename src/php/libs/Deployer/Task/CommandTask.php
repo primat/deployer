@@ -65,7 +65,7 @@ class CommandTask
 
             $exitStatus = proc_close($process);
             if ($exitStatus > 0) {
-                throw new ExitStatusException("Command failed.\n\tCommand: $cmd\n\tExit status: $exitStatus");
+                throw new ExitStatusException("Command failed.\n\tCommand: $cmd\n\tExit status: $exitStatus\n\tMessage: $result");
             }
         }
         else {
