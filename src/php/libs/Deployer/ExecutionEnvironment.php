@@ -47,6 +47,6 @@ class ExecutionEnvironment
 	{
 		$script = $this->scriptModel->getScript($name);
 		$script = $script->bindTo($this, $this);
-		$script($arguments);
+		call_user_func_array($script, $arguments);
 	}
 }
