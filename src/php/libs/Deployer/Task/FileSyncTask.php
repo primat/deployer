@@ -79,7 +79,8 @@ class FileSyncTask
 	}
 
 	/**
-	 *
+	 * @param RsyncOptions $rsync
+	 * @return string
 	 */
 	public function getRsyncCommand(RsyncOptions $rsync)
 	{
@@ -145,7 +146,7 @@ class FileSyncTask
 			$identity = '';
 			if ($rsync->useHostIdentity && ! empty($remoteHost->privateKeyPath)) {
 				// No CLI and no identity means a temporary SSL cert must be generated
-				$cmd .= ' -i ' . $this->cygwin->cygPath($remoteHost->privateKeyPath);
+				$cmd .= ' -i ' . $this->cygwin->getCygPath($remoteHost->privateKeyPath);
 			}
 			if (! $rsync->sshStrictHostKeyChecking) {
 				$cmd .= ' -o StrictHostKeyChecking=no';
@@ -158,14 +159,14 @@ class FileSyncTask
 		if ($rsync->source->isRemote() && $rsync->useSsh) {
 			$cmd .= "{$rsync->source->getHost()->account->username}@{$rsync->source->getHost()->hostname}:";
 		}
-		$cmd .= $this->cygwin->cygPath($rsync->source->getPath());
+		$cmd .= $this->cygwin->getCygPath($rsync->source->getPath());
 
 		// Continue building the command with the destination arg
 		$cmd .= ' ';
 		if ($rsync->destination->isRemote() && $rsync->useSsh) {
 			$cmd .= "{$rsync->destination->getHost()->account->username}@{$rsync->destination->getHost()->hostname}:";
 		}
-		$cmd .= $this->cygwin->cygPath($rsync->destination->getPath());
+		$cmd .= $this->cygwin->getCygPath($rsync->destination->getPath());
 
 		return $cmd;
 	}
