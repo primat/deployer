@@ -123,6 +123,20 @@ class App
 	}
 
 	/**
+	 * Get the folder path of the initial executing script
+	 * @return string
+	 * @throws \RuntimeException
+	 */
+	protected function getFolder()
+	{
+		$realPath = realpath($_SERVER['SCRIPT_NAME']);
+		if ($realPath) {
+			return dirname($realPath);
+		}
+		throw new \RuntimeException("Unable to establish the application folder");
+	}
+
+	/**
 	 * @param string $projectId
 	 * @param string $scriptId
 	 * @param [] $args
@@ -179,40 +193,8 @@ class App
 			$this->output->logScriptHeading($scriptConfig->getTitle());
 		}
 
-		$execEnv = new ExecutionEnvironment($taskModel, $scriptModel, $scriptConfig->getEntities(), $settings);
-
 		// Run the script!
+		$execEnv = new ExecutionEnvironment($taskModel, $scriptModel, $scriptConfig->getEntities(), $settings);
 		$execEnv->callScript($scriptId, $args);
-	}
-
-	/**
-	 * Get the folder path of the initial executing script
-	 * @return string
-	 * @throws \RuntimeException
-	 */
-	protected function getFolder()
-	{
-		$realPath = realpath($_SERVER['SCRIPT_NAME']);
-		if ($realPath) {
-			return dirname($realPath);
-		}
-		throw new \RuntimeException("Unable to establish the application folder");
-	}
-
-	/**
-	 * @param string $scriptId
-	 * @param bool $useDistinctFilename
-	 * @param string $distinctText
-	 * @return string
-	 */
-	protected function getLogFileName($scriptId, $useDistinctFilename = false, $distinctText = '')
-	{
-		// Build the project's log file (name)
-		$logFile = $scriptId;
-		if ($useDistinctFilename) {
-			$logFile .= '_' . $distinctText;
-		}
-		$logFile .= '.txt';
-		return $logFile;
 	}
 }
