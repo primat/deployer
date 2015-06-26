@@ -5,6 +5,8 @@ use \Primat\Deployer\Entity\Host;
 /**
  * An email connector class used to indicate how to send emails (e.g. smtp, sendmail or PHP's mail() function).
  * This is the SMTP connector
+ * Class SmtpConnector
+ * @package Primat\Deployer\Entity\Email
  */
 class SmtpConnector extends Connector
 {

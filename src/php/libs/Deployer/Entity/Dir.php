@@ -5,7 +5,8 @@ use Primat\Deployer\Entity\Host;
 use Primat\Deployer\EntityInterface\IDirectoryFile;
 
 /**
- *
+ * Class Dir
+ * @package Primat\Deployer\Entity
  */
 class Dir extends Entity implements IDirectoryFile
 {

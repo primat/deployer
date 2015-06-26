@@ -2,9 +2,10 @@
 /**
  * Created by PhpStorm.
  * Date: 5/13/2015
- * Time: 11:01 PM
  */
 
+use Primat\Deployer\Service\Logging\ConsoleLogger;
+use Primat\Deployer\Service\Logging\HtmlLogger;
 use Primat\Deployer\Service\Logging\ILogger;
 
 /**
@@ -20,11 +21,18 @@ class OutputTask
 
 	/**
 	 * Constructor
-	 * @param ILogger $logger
+	 * @param bool $useTextLogger
 	 */
-	public function __construct(Ilogger $logger)
+	public function __construct($useTextLogger = true)
     {
-		$this->loggers[] = $logger;
+		// Create the output task asap
+		if ($useTextLogger) {
+			$this->loggers[] = new ConsoleLogger();
+		}
+		else {
+			$this->loggers[] = new HtmlLogger();
+			$this->enableOutputFlush();
+		}
     }
 
 	/**
@@ -81,6 +89,18 @@ class OutputTask
 	public function logScriptHeading($message)
 	{
 		$this->log("\n---------------------------------------\n-------- {$message}\n\n");
+	}
+
+	/**
+	 * Flushes output for the HTTP buffer
+	 */
+	protected function enableOutputFlush()
+	{
+		ini_set('output_buffering', 'off');
+		ini_set('zlib.output_compression', false);
+		while (@ob_end_flush());
+		ini_set('implicit_flush', true);
+		ob_implicit_flush(true);
 	}
 
 	//

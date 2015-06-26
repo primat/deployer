@@ -13,6 +13,8 @@ use Primat\Deployer\ScriptConfig;
  */
 class FileScriptConfigModel implements IScriptConfigModel
 {
+	const MAX_RECURSION = 1;
+
 	/** @var string $baseFolder */
 	protected $baseFolder = '';
 	/** @var IEntityModel $baseFolder */
@@ -31,58 +33,60 @@ class FileScriptConfigModel implements IScriptConfigModel
 
 	/**
 	 * Gets the script configuration data, as an object
-	 * @param string $key
+	 * @param string $configId
 	 * @return ScriptConfig
 	 * @throws ScriptConfigException
 	 */
-	public function getScriptConfig($key)
+	public function getScriptConfig($configId)
 	{
-		$data = $this->getConfigData($key);
-
+		$data = $this->getConfigData($configId);
 		$title = '';
+		$entities = [];
+		$scriptId = $configId;
+		$settings = [];
+
 		if (isset($data['title'])) {
 			$title = $data['title'];
 		}
 
-		$entities = [];
-
 		if (isset($data['entities'])) {
-
-			foreach($data['entities'] as $id => $list) {
-
-				if (is_array($data['entities'][$id][0])) {
-
-					if (!isset($entities[$id]) || !is_array($entities[$id])) {
-						$entities[$id] = [];
-					}
-
-					foreach($data['entities'][$id] as $subIndex => $subEntity) {
-						//$type = $data['entityCollection'][$id][$subIndex][0];
-						//$typeId = $data['entityCollection'][$id][$subIndex][1];
-						//$entities[$id][] = $this->entityModel->getEntity($type, $typeId);
-						$entities[$id][] = call_user_func_array([$this->entityModel, 'getEntity'], $subEntity);
-					}
-				}
-				else {
-					$type = $data['entities'][$id][0];
-					$typeId = $data['entities'][$id][1];
-					$entities[$id] = $this->entityModel->getEntity($type, $typeId);
-				}
-
-			}
+			$entities = $this->createObjectEntities($data['entities']);
 		}
 
-		$scriptId = $key;
 		if (isset($data['script'])) {
 			$scriptId = $data['script'];
 		}
 
-		$settings = [];
 		if (isset($data['settings'])) {
 			$settings = $data['settings'];
 		}
 
 		return new ScriptConfig($scriptId, $title, $entities, $settings);
+	}
+
+	/**
+	 * @param array $arrayEntities
+	 * @param int $recursionLevel
+	 * @return array
+	 */
+	protected function createObjectEntities(array $arrayEntities, $recursionLevel = 0)
+	{
+		$entities = [];
+
+		// Cycle through each entity
+		foreach ($arrayEntities as $id => $list) {
+
+			// If the array value of the first element of list is also an array, then we are dealing with a collection
+			// of entities rather than a single one, so we have to cycle through the
+			if (is_array($list[0]) && $recursionLevel < self::MAX_RECURSION) {
+				$entities[$id] = $this->createObjectEntities($list, $recursionLevel + 1);
+			}
+			else {
+				$entities[$id] = $this->entityModel->getEntity($arrayEntities[$id][0], $arrayEntities[$id][1]);
+			}
+
+		}
+		return $entities;
 	}
 
 	/**

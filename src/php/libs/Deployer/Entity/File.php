@@ -6,6 +6,8 @@ use Primat\Deployer\EntityInterface\IDirectoryFile;
 
 /**
  * This entity class represents a File
+ * Class File
+ * @package Primat\Deployer\Entity
  */
 class File extends Entity implements IDirectoryFile
 {

@@ -4,6 +4,8 @@ use Primat\Deployer\Task;
 
 /**
  * The TimerTask class is a chronometer for measuring script execution time
+ * Class TimerTask
+ * @package Primat\Deployer\Task
  */
 class TimerTask
 {

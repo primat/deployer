@@ -2,7 +2,6 @@
 /**
  * Created by PhpStorm.
  * Date: 5/13/2015
- * Time: 10:16 PM
  */
 
 use Primat\Deployer\Exception\CommandException;

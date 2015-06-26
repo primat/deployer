@@ -1,8 +1,7 @@
-<?php
+<?php namespace Primat\Deployer\Service;
 /**
  *
  */
-namespace Primat\Deployer\Service;
 
 /**
  * Class MysqlToSqlite

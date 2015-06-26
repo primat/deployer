@@ -3,7 +3,8 @@
 use \Primat\Deployer\Task;
 
 /**
- *
+ * Class ViewTask
+ * @package Primat\Deployer\Task
  */
 class ViewTask
 {
@@ -20,14 +21,14 @@ class ViewTask
 	}
 
 	/**
-	 * @param \Primat\Deployer\Entity\SvnLogEntry[] $logEntries
+	 * @param \Primat\Deployer\Entity\Svn\SvnLogEntry[] $logEntries
 	 * @return string
 	 */
 	public function getLogEntriesHtml(array $logEntries) {
 		$changelogHtml = '';
 		if (count($logEntries)) {
 			$changelogHtml .= '<ul>';
-			foreach($logEntries as $revision => $entry) { /* @var \Primat\Deployer\Entity\SvnLogEntry $entry */
+			foreach($logEntries as $revision => $entry) { /* @var \Primat\Deployer\Entity\Svn\SvnLogEntry $entry */
 				$changelogHtml .= "<li><strong>{$revision}</strong><br />" . nl2br(trim($entry->message)) . "<br/><br/></li>";
 			}
 			$changelogHtml .= '</ul>';
@@ -36,12 +37,12 @@ class ViewTask
 	}
 
 	/**
-	 * @param \Primat\Deployer\Entity\SvnLogEntry[] $logEntries
+	 * @param \Primat\Deployer\Entity\Svn\SvnLogEntry[] $logEntries
 	 * @return string
 	 */
 	public function getLogEntriesText(array $logEntries) {
 		$changelogText = '';
-		foreach($logEntries as $revision => $entry) { /* @var \Primat\Deployer\Entity\SvnLogEntry $entry */
+		foreach($logEntries as $revision => $entry) { /* @var \Primat\Deployer\Entity\Svn\SvnLogEntry $entry */
 			$changelogText .= "{$revision}:\n" . trim($entry->message) . "\n\n";
 		}
 		return $changelogText;
@@ -53,7 +54,7 @@ class ViewTask
 	 * @param bool $noEcho
 	 * @return string
 	 */
-	public function load($path, array $data = NULL, $noEcho = FALSE)
+	public function load($path, array $data = null, $noEcho = FALSE)
 	{
 		if (isset($data) && count($data)) {
 			extract($data);
@@ -68,5 +69,17 @@ class ViewTask
 			ob_end_clean();
 		}
 		return $content;
+	}
+
+	//
+	// Setters and Getters
+	//
+
+	/**
+	 * @param string $folderViews
+	 */
+	public function setFolderViews($folderViews)
+	{
+		$this->folderViews = $folderViews;
 	}
 }

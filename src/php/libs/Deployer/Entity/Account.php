@@ -3,7 +3,8 @@
 use Primat\Deployer\Entity;
 
 /**
- *
+ * Class Account
+ * @package Primat\Deployer\Entity
  */
 class Account extends Entity
 {

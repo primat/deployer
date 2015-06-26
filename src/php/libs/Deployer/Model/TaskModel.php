@@ -2,7 +2,6 @@
 /**
  * Created by PhpStorm
  * Date: 6/4/2015
- * Time: 10:20 PM
  */
 
 use Primat\Deployer\Service\Logging\ConsoleLogger;
@@ -38,6 +37,8 @@ class TaskModel
 	public $fileSystem;
 	/** @var \Primat\Deployer\Task\MysqlTask $mysql */
 	public $mysql;
+	/** @var \Primat\Deployer\Task\OutputTask $output */
+	public $output;
 	/** @var \Primat\Deployer\Task\SqliteTask $sqlite */
 	public $sqlite;
 	/** @var \Primat\Deployer\Task\SshTask $ssh */
@@ -46,8 +47,6 @@ class TaskModel
 	public $svn;
 	/** @var \Primat\Deployer\Task\TimerTask $timer */
 	public $timer;
-	/** @var \Primat\Deployer\Task\OutputTask $output */
-	public $output;
 	/** @var \Primat\Deployer\Task\ViewTask $view */
 	public $view;
 
@@ -58,31 +57,23 @@ class TaskModel
 	protected $expect;
 
 	/**
-	 * @param string $appFolder
-	 * @param string $projectFolder
-	 * @param string $cacheFolder
-	 * @param string $tmpFolder
+	 * @param OutputTask $outputTask
+	 * @param IProjectModel $projectModel
 	 * @param bool $isCli
 	 */
-	public function __construct($appFolder, $projectFolder, $cacheFolder, $tmpFolder, $isCli)
+	public function __construct(OutputTask $outputTask, $projectModel, $isCli)
 	{
 		$this->cygwin = new Cygwin();
-		$this->expect = new Expect($appFolder, $this->cygwin);
+		$this->expect = new Expect($this->cygwin);
 
-		if ($isCli) {
-			$this->output = new OutputTask(new ConsoleLogger());
-		}
-		else {
-			$this->output = new OutputTask(new HtmlLogger());
-		}
-
+		$this->output = $outputTask;
 		$this->cli = new CliTask($this->output);
 		$this->command = new CommandTask($this->output);
 		$this->fileSystem = new FileSystemTask($this->output);
-		$this->ssh = new SshTask($this->output, $tmpFolder);
-		$this->fileSync = new FileSyncTask($this->expect, $this->cygwin, $this->output, $this->ssh, $this->command, $isCli);
-		$this->svn = new SvnTask($this->output, $this->command, $this->fileSystem, $cacheFolder);
-		$this->view = new ViewTask($projectFolder);
-		$this->email = new EmailTask($this->output, $isCli);
+		$this->ssh = new SshTask($this->output, $projectModel->getTempFolder());
+		$this->fileSync = new FileSyncTask($this->output, $this->expect, $this->cygwin, $this->ssh, $this->command, $isCli);
+		$this->svn = new SvnTask($this->output, $this->command, $this->fileSystem, $projectModel->getCacheFolder());
+		$this->view = new ViewTask($projectModel->getViewsFolder());
+		$this->email = new EmailTask($this->output);
 	}
 }

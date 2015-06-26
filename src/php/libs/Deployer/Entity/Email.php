@@ -4,6 +4,8 @@ use \Primat\Deployer\Entity;
 
 /**
  * A class for storing Email related data such as a list of recipients or reply-to address, for example
+ * Class Email
+ * @package Primat\Deployer\Entity
  */
 class Email extends Entity
 {

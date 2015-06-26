@@ -7,25 +7,30 @@ use \Primat\Deployer\Exception\TaskException;
 
 /**
  * The email task class takes care of sending emails
+ * Class EmailTask
+ * @package Primat\Deployer\Task
  */
 class EmailTask
 {
+	const DEBUG_FORMAT_TEXT = 'text';
+	const DEBUG_FORMAT_HTML = 'html';
+
 	/** @var bool $debugLevel */
 	protected $debugLevel = 0;
-	/**  @var bool $isCli */
-	protected $isCli;
+	/**  @var string $debugOutput */
+	protected $debugOutput;
 	/**  @var \Primat\Deployer\Task\OutputTask $outputTask */
 	protected $outputTask;
 
 	/**
 	 * Constructor
 	 * @param OutputTask $outputTask
-	 * @param bool $isCli
+	 * @param string $debugOutput
 	 */
-	public function __construct(OutputTask $outputTask, $isCli)
+	public function __construct(OutputTask $outputTask, $debugOutput = self::DEBUG_FORMAT_TEXT)
 	{
 		$this->outputTask = $outputTask;
-		$this->isCli = $isCli;
+		$this->debugOutput = $debugOutput;
 	}
 
 	/**
@@ -68,7 +73,7 @@ class EmailTask
 			// 2 = client and server messages
 			$mail->SMTPDebug = $this->debugLevel;
 			//Ask for HTML-friendly debug output
-			$mail->Debugoutput = $this->isCli ? 'html' : 'echo';
+			$mail->Debugoutput = (($this->debugOutput === self::DEBUG_FORMAT_HTML) ? 'html' : 'echo');
 			//Set the hostname of the mail server
 			$mail->Host = $connector->host->getHostname();
 			//Set the SMTP port number - likely to be 25, 465 or 587

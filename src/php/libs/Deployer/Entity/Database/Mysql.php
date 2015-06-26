@@ -1,12 +1,12 @@
 <?php namespace Primat\Deployer\Entity\Database;
 
-//use \Primat\Deployer\Entity\Host;
-//use \Primat\Deployer\Entity\Account;
+use \Primat\Deployer\Entity\Database;
 
 /**
- *
+ * Class Mysql
+ * @package Primat\Deployer\Entity\Database
  */
-class Mysql extends \Primat\Deployer\Entity\Database
+class Mysql extends Database
 {
 
 }

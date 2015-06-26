@@ -21,6 +21,10 @@ class FileEntityModel implements IEntityModel
 	protected $cache = [];
 	/** @var string[] $data */
 	protected $data = [];
+	/** @var string $entitiesFile */
+	protected $entitiesFile = '/entities.php';
+	/** @var string $entitiesLocalFile */
+	protected $entitiesLocalFile = '/entities-local.php';
 
 	/**
 	 * Constructor
@@ -29,7 +33,7 @@ class FileEntityModel implements IEntityModel
 	public function __construct($baseFolder)
 	{
 		$this->baseFolder = rtrim($baseFolder, '/\\');
-		$this->data = $this->getEntityData();
+		$this->data = $this->loadEntityData();
 	}
 
 	/**
@@ -99,10 +103,10 @@ class FileEntityModel implements IEntityModel
 	 * @return array
 	 * @throws EntityException
 	 */
-	protected function getEntityData()
+	protected function loadEntityData()
 	{
-		$entitiesFile = $this->baseFolder . '/entities.php';
-		$customEntitiesFile = $this->baseFolder . '/entities-local.php';
+		$entitiesFile = $this->baseFolder . '/' . $this->entitiesFile;
+		$customEntitiesFile = $this->baseFolder . '/' . $this->entitiesLocalFile;
 		if (is_file($entitiesFile)) {
 			$data = include $entitiesFile;
 		}

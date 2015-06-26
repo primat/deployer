@@ -8,6 +8,8 @@ use \Primat\Deployer\Entity\RsyncOptions;
 
 /**
  * Task for synchronizing files from local to remote, local to local but not remote to remote (use SshTask for that)
+ * Class FileSyncTask
+ * @package Primat\Deployer\Task
  */
 class FileSyncTask
 {
@@ -36,7 +38,7 @@ class FileSyncTask
 	 * @param bool $isCli
 	 * @param string $rsyncCmd
 	 */
-	public function __construct(Expect $expect, Cygwin $cygwin, OutputTask $outputTask, SshTask $sshTask,
+	public function __construct(OutputTask $outputTask, Expect $expect, Cygwin $cygwin, SshTask $sshTask,
 		CommandTask $commandTask, $isCli, $rsyncCmd = 'rsync')
 	{
 		$this->isCli = $isCli;

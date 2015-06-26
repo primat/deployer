@@ -1,14 +1,16 @@
 <?php namespace Primat\Deployer\Exception;
 /**
  * Project: Deployer
- * User: mprice
  * Date: 11/05/15
  */
+
+use Primat\Deployer\Exception;
+
 /**
  * Class LoggerException
  * @package Primat\Deployer\Exception
  */
-class LoggerException extends \Primat\Deployer\Exception
+class LoggerException extends Exception
 {
 
 }

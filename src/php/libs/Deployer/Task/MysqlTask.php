@@ -10,7 +10,8 @@ use \Primat\Deployer\Config;
 use \Primat\Deployer\Task;
 
 /**
- *
+ * Class MysqlTask
+ * @package Primat\Deployer\Task
  */
 class MysqlTask
 {

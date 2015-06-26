@@ -1,30 +1,29 @@
 <?php namespace Primat\Deployer\Utils;
 
-use \Primat\Deployer\Utils\Cygwin;
-
 /**
  * Class Expect
  * @package Primat\Deployer\Utils
  */
 class Expect
 {
+	const SRC_REL_PATH = '../../../..';
+
 	/** @var string $srcPath */
 	protected $srcPath;
-	/** @var Cygwin $cygWin */
-	protected $cygwin;
+	/** @var Cygwin $cygwinService */
+	protected $cygwinService;
 	/** @var string $expectCmd */
 	protected $expectCmd = 'expect';
 
 	/**
 	 * Constructor
-	 * @param string $srcPath
-	 * @param Cygwin $cygwin
+	 * @param Cygwin $cygwinService
 	 * @param string $expectCmd
 	 */
-	public function __construct($srcPath, Cygwin $cygwin, $expectCmd = 'expect')
+	public function __construct(Cygwin $cygwinService, $expectCmd = 'expect')
 	{
-		$this->srcPath = $srcPath;
-		$this->cygwin = $cygwin;
+		$this->srcPath = realpath(__DIR__ . '/' . self::SRC_REL_PATH);
+		$this->cygwinService = $cygwinService;
 		$this->expectCmd = $expectCmd;
 	}
 
@@ -35,6 +34,6 @@ class Expect
 	 */
 	public function getPasswordCommandTemplate()
 	{
-		return $this->expectCmd . ' ' . $this->cygwin->cygPath($this->srcPath) . '/expect/pass.exp "%s" "%s"';
+		return $this->expectCmd . ' ' . $this->cygwinService->getCygPath($this->srcPath) . '/expect/pass.exp "%s" "%s"';
 	}
 }

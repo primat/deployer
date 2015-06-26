@@ -3,7 +3,8 @@
 use Primat\Deployer\Entity;
 
 /**
- *
+ * Class Host
+ * @package Primat\Deployer\Entity
  */
 class Host extends Entity
 {

@@ -1,6 +1,9 @@
 <?php namespace Primat\Deployer\EntityInterface;
 
-
+/**
+ * Interface IDirectoryFile
+ * @package Primat\Deployer\EntityInterface
+ */
 interface IDirectoryFile {
 
 	public function getHost();

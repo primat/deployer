@@ -9,6 +9,8 @@ use Primat\Deployer\Task;
 
 /**
  * Performs task related to the command line interface
+ * Class CliTask
+ * @package Primat\Deployer\Task
  */
 class CliTask
 {

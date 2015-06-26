@@ -2,6 +2,11 @@
 /**
  *
  */
+
+/**
+ * Class Exception
+ * @package Primat\Deployer
+ */
 class Exception extends \Exception
 {
 

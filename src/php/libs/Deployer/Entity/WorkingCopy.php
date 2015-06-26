@@ -4,7 +4,8 @@ use Primat\Deployer\Entity;
 use Primat\Deployer\Exception;
 
 /**
- *
+ * Class WorkingCopy
+ * @package Primat\Deployer\Entity
  */
 class WorkingCopy extends Entity
 {

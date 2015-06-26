@@ -18,6 +18,8 @@ use \Primat\Deployer\Task;
 
 /**
  * Class for doing subversion related tasks
+ * Class SvnTask
+ * @package Primat\Deployer\Task
  */
 class SvnTask
 {

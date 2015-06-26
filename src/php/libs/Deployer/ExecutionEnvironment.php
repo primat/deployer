@@ -31,11 +31,11 @@ class ExecutionEnvironment
 	public function __construct(TaskModel $tasks, IScriptModel $scriptModel, array $entities, array $settings)
 	{
 		$this->task = $tasks;
+		$this->scriptModel = $scriptModel;
 		foreach ($entities as $key => $value){
 			$this->{$key} = $value;
 		}
 		$this->settings = $settings;
-		$this->scriptModel = $scriptModel;
 	}
 
 	/**

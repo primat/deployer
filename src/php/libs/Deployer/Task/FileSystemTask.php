@@ -4,7 +4,8 @@ use Primat\Deployer\Exception;
 use Primat\Deployer\Exception\TaskException;
 
 /**
- *
+ * Class FileSystemTask
+ * @package Primat\Deployer\Task
  */
 class FileSystemTask
 {

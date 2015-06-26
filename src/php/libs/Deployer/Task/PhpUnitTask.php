@@ -4,6 +4,8 @@ use \Primat\Deployer\Task;
 
 /**
  * A class for running phpunit tests
+ * Class PhpUnitTask
+ * @package Primat\Deployer\Task
  */
 class PhpUnitTask
 {
