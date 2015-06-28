@@ -25,6 +25,20 @@ class FileSystemTask
 	}
 
 	/**
+	 *
+	 * @param string $path
+	 * @param bool $deleteRootDir
+	 */
+	public function deleteFile($path, $deleteRootDir = true)
+	{
+		if (is_dir($path)) {
+			$this->deleteFolder($path, $deleteRootDir);
+			return;
+		}
+		unlink($path);
+	}
+
+	/**
 	 * Recursively iterate through a directory and delete all files and folders
 	 * @param $dir
 	 * @param bool $deleteRootDir

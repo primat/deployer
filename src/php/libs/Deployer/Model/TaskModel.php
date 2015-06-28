@@ -4,18 +4,17 @@
  * Date: 6/4/2015
  */
 
-use Primat\Deployer\Service\Logging\ConsoleLogger;
-use Primat\Deployer\Service\Logging\HtmlLogger;
 use Primat\Deployer\Task\CliTask;
 use Primat\Deployer\Task\CommandTask;
-use Primat\Deployer\Task\FileSystemTask;
+use Primat\Deployer\Task\EmailTask;
 use Primat\Deployer\Task\FileSyncTask;
+use Primat\Deployer\Task\FileSystemTask;
 use Primat\Deployer\Task\OutputTask;
+use Primat\Deployer\Task\SftpTask;
 use Primat\Deployer\Task\SshTask;
 use Primat\Deployer\Task\SvnTask;
 use Primat\Deployer\Task\ViewTask;
-use Primat\Deployer\Task\EmailTask;
-use Primat\Deployer\Utils\cygwin;
+use Primat\Deployer\Utils\Cygwin;
 use Primat\Deployer\Utils\Expect;
 
 /**
@@ -24,7 +23,13 @@ use Primat\Deployer\Utils\Expect;
  */
 class TaskModel
 {
-	//Tasks
+	// Services
+	/** @var \Primat\Deployer\Utils\Cygwin $cygwin */
+	protected $cygwin;
+	/** @var \Primat\Deployer\Utils\Expect $expect */
+	protected $expect;
+
+	// Tasks
 	/** @var \Primat\Deployer\Task\CliTask $cli */
 	public $cli;
 	/** @var \Primat\Deployer\Task\CommandTask $command */
@@ -39,6 +44,8 @@ class TaskModel
 	public $mysql;
 	/** @var \Primat\Deployer\Task\OutputTask $output */
 	public $output;
+	/** @var \Primat\Deployer\Task\SftpTask $sftp */
+	public $sftp;
 	/** @var \Primat\Deployer\Task\SqliteTask $sqlite */
 	public $sqlite;
 	/** @var \Primat\Deployer\Task\SshTask $ssh */
@@ -49,12 +56,6 @@ class TaskModel
 	public $timer;
 	/** @var \Primat\Deployer\Task\ViewTask $view */
 	public $view;
-
-	// Services
-	/** @var \Primat\Deployer\Utils\Cygwin $cygwin */
-	protected $cygwin;
-	/** @var \Primat\Deployer\Utils\Expect $expect */
-	protected $expect;
 
 	/**
 	 * @param OutputTask $outputTask
@@ -70,6 +71,7 @@ class TaskModel
 		$this->cli = new CliTask($this->output);
 		$this->command = new CommandTask($this->output);
 		$this->fileSystem = new FileSystemTask($this->output);
+		$this->sftp = new SftpTask($this->output, $this->fileSystem);
 		$this->ssh = new SshTask($this->output, $projectModel->getTempFolder());
 		$this->fileSync = new FileSyncTask($this->output, $this->expect, $this->cygwin, $this->ssh, $this->command, $isCli);
 		$this->svn = new SvnTask($this->output, $this->command, $this->fileSystem, $projectModel->getCacheFolder());

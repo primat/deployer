@@ -18,8 +18,6 @@ class Dir extends Entity implements IDirectoryFile
 	public $path = ''; // Should always contains a trailing slash, for directory paths
 	/** @var bool $isWinDir flag to indicate if the path is a Windows path */
 	public $isWinDir = '';
-	/** @var bool $isRemote Simple flag to indicate if the resource is remote or not */
-	protected $isRemote = FALSE;
 	/** @var string $separator The separator used when evaluating paths */
 	protected $separator = '/';
 
@@ -64,6 +62,15 @@ class Dir extends Entity implements IDirectoryFile
 	 * Get the full directory path, including the trailing slash
 	 * @return string
 	 */
+	public function getLocation()
+	{
+		return $this->getPath() . ((empty($this->host)) ? '' : ":" . $this->host->getHostname());
+	}
+
+	/**
+	 * Get the full directory path, including the trailing slash
+	 * @return string
+	 */
 	public function getPath()
 	{
 		return $this->path;
@@ -83,6 +90,6 @@ class Dir extends Entity implements IDirectoryFile
 	 */
 	public function isRemote()
 	{
-		return ! empty($this->host) && $this->host instanceof Host && $this->host->name !== 'localhost';
+		return ! empty($this->host) && $this->host instanceof Host && $this->host->hostname !== 'localhost';
 	}
 }
