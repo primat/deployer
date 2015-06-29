@@ -41,12 +41,12 @@ class ExecutionEnvironment
 	/**
 	 * @param $name
 	 * @param array $arguments
-	 * @return bool|mixed
+	 * @return mixed
 	 */
 	public function callScript($name, $arguments = [])
 	{
 		$script = $this->scriptModel->getScript($name);
 		$script = $script->bindTo($this, $this);
-		call_user_func_array($script, $arguments);
+		return call_user_func_array($script, $arguments);
 	}
 }

@@ -717,7 +717,7 @@ class SvnTask
 	public function getWorkingCopyRevision($path)
 	{
 		$cmd = $this->cmdSvnVersion . " $path 2>&1";
-		$result = $this->commandTask->runCmd($cmd, false);
+		$result = trim($this->commandTask->runCmd($cmd, false));
 		if (stripos($result, 'unversioned') !== false) {
 			return '';
 		}

@@ -56,6 +56,8 @@ class FileSyncTask
 	 */
 	public function sync(RsyncOptions $rsync)
 	{
+		$this->outputTask->log("- Rsyncing " . $rsync->source->getLocation() . " with " . $rsync->destination->getLocation() . "\n\n");
+
 		$remoteHost = $rsync->getRemoteHost();
 
 		if (empty($rsync->identityFilePath) && !$this->isCli) {
@@ -71,7 +73,7 @@ class FileSyncTask
 			$command = sprintf($cmdTemplate, addslashes($command), addslashes($remoteHost->account->password));
 		}
 		else {
-			$this->outputTask->log($command . "\n\n");
+			$this->outputTask->log("$command\n\n");
 		}
 
 		$this->commandTask->runCmd($command);
