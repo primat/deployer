@@ -1,7 +1,6 @@
-<?php  namespace Primat\Deployer\Entity; 
+<?php  namespace Primat\Deployer\Entity;
 /**
- * Project: Deployer
- * Date: 26/05/15
+ *
  */
 
 use Primat\Deployer\Entity;

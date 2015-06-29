@@ -9,6 +9,7 @@ use Primat\Deployer\Task\CommandTask;
 use Primat\Deployer\Task\EmailTask;
 use Primat\Deployer\Task\FileSyncTask;
 use Primat\Deployer\Task\FileSystemTask;
+use Primat\Deployer\Task\GitTask;
 use Primat\Deployer\Task\OutputTask;
 use Primat\Deployer\Task\SftpTask;
 use Primat\Deployer\Task\SshTask;
@@ -40,6 +41,8 @@ class TaskModel
 	public $fileSync;
 	/** @var \Primat\Deployer\Task\FileSystemTask $fileSystem */
 	public $fileSystem;
+	/** @var \Primat\Deployer\Task\GitTask $git */
+	public $git;
 	/** @var \Primat\Deployer\Task\MysqlTask $mysql */
 	public $mysql;
 	/** @var \Primat\Deployer\Task\OutputTask $output */
@@ -74,6 +77,7 @@ class TaskModel
 		$this->sftp = new SftpTask($this->output, $this->fileSystem);
 		$this->ssh = new SshTask($this->output, $projectModel->getTempFolder());
 		$this->fileSync = new FileSyncTask($this->output, $this->expect, $this->cygwin, $this->ssh, $this->command, $isCli);
+		$this->git = new GitTask($this->output, $this->command, $this->fileSystem, $projectModel->getCacheFolder());
 		$this->svn = new SvnTask($this->output, $this->command, $this->fileSystem, $projectModel->getCacheFolder());
 		$this->view = new ViewTask($projectModel->getViewsFolder());
 		$this->email = new EmailTask($this->output);

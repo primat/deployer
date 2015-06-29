@@ -69,7 +69,7 @@ class SftpTask
 	 * @param bool $isDryRun
 	 * @throws TaskException
 	 */
-	public function syncDir(Dir $sourceDir, Dir $destinationDir, $excludedFiles, $isDryRun = false)
+	public function syncDir(Dir $sourceDir, Dir $destinationDir, $excludedFiles = [], $isDryRun = false)
 	{
 		$sourceHost = $sourceDir->getHost();
 		$destinationHost = $destinationDir->getHost();
@@ -119,6 +119,7 @@ class SftpTask
 	 */
 	protected function prepFilesList($localFiles, $remoteFiles, $excludedFiles)
 	{
+		$excludedFiles += ['.', '..'];
 		$files = $localFiles + $remoteFiles;
 		foreach ($excludedFiles as $exclusion => $dummy) {
 			if (isset($files[$exclusion])) {

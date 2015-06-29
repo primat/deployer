@@ -10,16 +10,18 @@ use Primat\Deployer\Exception\TaskException;
 class FileSystemTask
 {
 	/**
+	 * @param $folder
 	 * @param string $name
-	 * @param string $folder
+	 * @param int $permissions
+	 * @param bool $recursive
 	 * @throws TaskException
 	 */
-	public function createFolder($folder, $name = '')
+	public function createFolder($folder, $name = '', $permissions = 0777, $recursive = false)
 	{
 		if (is_dir($folder)) {
 			return;
 		}
-		if (! mkdir($folder, 0777, true)) {
+		if (! mkdir($folder, $permissions, $recursive)) {
 			throw new TaskException("Error: Unable to create $name folder " . $folder);
 		}
 	}
