@@ -57,6 +57,8 @@ class CliTask
 			$choices[] = $db->getDbName() . ' on ' . $db->getHost()->getHostname();
 		}
 		$selection = CliTask::promptMultipleChoice($choices, $promptText);
+		$this->outputTask->log("You chose " . $databases[$selection]->getDbName() . " on " .
+			$databases[$selection]->getHost()->getHostname() . "\n\n");
 		return $mapping[$selection];
 	}
 
@@ -182,9 +184,9 @@ class CliTask
 	 * Prompt the user to select a directory for a specific remote host
 	 * @param Dir[] $dirs
 	 * @param string $promptText
-	 * @return mixed
+	 * @return \Primat\Deployer\Entity\Dir
 	 */
-	public function promptDir(array $dirs, $promptText = 'Choose a remote directory:')
+	public function promptDir(array $dirs, $promptText = 'Choose a directory:')
 	{
 		$choices = array();
 		foreach($dirs as $index => $dir) {
@@ -195,7 +197,7 @@ class CliTask
 			}
 			$choices[] = $displayString;
 		}
-		$selection = CliTask::promptMultipleChoice($choices, $promptText);
+		$selection = $this->promptMultipleChoice($choices, $promptText);
 		$this->outputTask->log("You chose " . $dirs[$selection]->getPath() . "\n\n");
 		return $dirs[$selection];
 	}
