@@ -10,6 +10,7 @@ use Primat\Deployer\Task\EmailTask;
 use Primat\Deployer\Task\FileSyncTask;
 use Primat\Deployer\Task\FileSystemTask;
 use Primat\Deployer\Task\GitTask;
+use Primat\Deployer\Task\MysqlTask;
 use Primat\Deployer\Task\OutputTask;
 use Primat\Deployer\Task\SftpTask;
 use Primat\Deployer\Task\SshTask;
@@ -81,5 +82,6 @@ class TaskModel
 		$this->svn = new SvnTask($this->output, $this->command, $this->fileSystem, $projectModel->getCacheFolder());
 		$this->view = new ViewTask($projectModel->getViewsFolder());
 		$this->email = new EmailTask($this->output);
+		$this->mysql = new MysqlTask($this->output, $this->command, $this->fileSystem);
 	}
 }

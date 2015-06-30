@@ -17,7 +17,6 @@ class Database extends Entity
 	/** @var Account $account */
 	public $account;
 
-
 	/**
 	 * @param Account $account
 	 * @param string $dbName

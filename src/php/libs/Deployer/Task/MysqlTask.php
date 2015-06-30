@@ -1,13 +1,12 @@
 <?php namespace Primat\Deployer\Task;
+/**
+ *
+ */
 
-use \Primat\Deployer\Entity\WorkingCopy;
-use \Primat\Deployer\Entity\Account;
-use \Primat\Deployer\Entity\Node;
-use \Primat\Deployer\Entity\File;
 use \Primat\Deployer\Entity\Database;
+use \Primat\Deployer\Entity\File;
 use \Primat\Deployer\Exception;
-use \Primat\Deployer\Config;
-use \Primat\Deployer\Task;
+use \Primat\Deployer\Exception\TaskException;
 
 /**
  * Class MysqlTask
@@ -15,14 +14,48 @@ use \Primat\Deployer\Task;
  */
 class MysqlTask
 {
+	/**  @var string $cmdMysql */
+	protected $cmdMysql;
+	/**  @var string $cmdMysqlDump */
+	protected $cmdMysqlDump;
+	/**  @var string $cmdMysqlImport */
+	protected $cmdMysqlImport;
+	/**  @var \Primat\Deployer\Task\CommandTask $commandTask */
+	protected $commandTask;
+	/**  @var \Primat\Deployer\Task\FileSystemTask $fileSystemTask */
+	protected $fileSystemTask;
+	/**  @var \Primat\Deployer\Task\OutputTask $outputTask */
+	protected $outputTask;
+
+	/**
+	 * Construct
+	 * @param OutputTask $outputTask
+	 * @param CommandTask $commandTask
+	 * @param FileSystemTask $fileSystemTask
+	 * @param string $cmdMysql
+	 * @param string $cmdMysqlDump
+	 * @param string $cmdMysqlImport
+	 */
+	public function __construct(OutputTask $outputTask, CommandTask $commandTask, FileSystemTask $fileSystemTask,
+		$cmdMysql = 'mysql', $cmdMysqlDump = 'mysqldump', $cmdMysqlImport = 'mysqlimport')
+	{
+		$this->commandTask = $commandTask;
+		$this->fileSystemTask = $fileSystemTask;
+		$this->outputTask = $outputTask;
+		$this->cmdMysql = $cmdMysql;
+		$this->cmdMysqlDump = $cmdMysqlDump;
+		$this->cmdMysqlImport = $cmdMysqlImport;
+	}
+
 	/**
 	 * @param \Primat\Deployer\Entity\Database $db
 	 * @param \Primat\Deployer\Entity\File $dumpFile
 	 * @param $dbName
 	 * @param array $tables
+	 * @return bool
 	 * @throws \Primat\Deployer\Exception
 	 */
-	public static function mysqlDump(Database $db, $dbName, array $tables = array(), File $dumpFile)
+	public function createDumpFile(Database $db, $dbName, array $tables = array(), File $dumpFile)
 	{
 		if (! is_array($tables) || count($tables) === 0) {
 			$tablesParam = '';
@@ -32,49 +65,50 @@ class MysqlTask
 		}
 
 		// Presentation
-		self::log("- Getting dump of {$dbName}");
+		$this->outputTask->log("- Getting dump of {$dbName}");
 		if ($db->isRemote()) {
-			Task::log(" from {$db->host->hostname}");
+			$this->outputTask->log(" from {$db->host->hostname}");
 		}
-		self::log("\n");
+		$this->outputTask->log("\n");
 
 		// For use when converting a dump to SQLite
 		// --compatible=ansi --skip-extended-insert --compact
 
 		// Build the command
-		$cmd = Config::get('mysqldump.bin') . " -vf -P {$db->port}";
+		$cmd = $this->cmdMysqlDump . " -vf -P {$db->port}";
 		if ($db->isRemote()) {
 			$cmd .= " -h {$db->host->hostname}";
 		}
 
 		// Create the folder if it doesn't exist already
-		FileSystemTask::mkdir($dumpFile->dir->getPath());
+		$this->fileSystemTask->createFolder($dumpFile->dir->getPath());
 
 		$cmd .= " -u {$db->account->username} -p{$db->account->password} {$dbName} {$tablesParam}| sed '/^\\/\\*\\!50013 DEFINER/d' > {$dumpFile->getPath()}";
-
 		//$cmd .= " --result-file={$dumpFile->getPath()} -u {$db->account->username} -p{$db->account->password} {$dbName} {$tablesParam} 2>&1";
 
-		self::runCmd($cmd);
-		self::log("\n");
+		$this->commandTask->runCmd($cmd);
+		$this->outputTask->log("\n");
+
+		return true;
 	}
 
 	/**
-	 * @param \Primat\Deployer\Entity\Database $db
-	 * @param $dumpFilePath
-	 * @param $dbName
-	 * @throws \Primat\Deployer\Exception
+	 * @param Database $db
+	 * @param string $dumpFilePath
+	 * @param string $dbName
+	 * @throws TaskException
 	 */
-	public static function importDump(Database $db, $dumpFilePath, $dbName)
+	public function importDump(Database $db, $dumpFilePath, $dbName)
 	{
-		$command = 'mysql -P ' . $db->port . ' -h ' . $db->host->hostname . ' -u ' . $db->account->username .
+		$command = $this->cmdMysql . ' -P ' . $db->port . ' -h ' . $db->host->hostname . ' -u ' . $db->account->username .
 			' -p"' . $db->account->password . '" ' . $dbName . ' < ' . $dumpFilePath . ' 2>&1';
-		
-		self::log("- Importing MySQL dump to DB {$dbName} at {$db->host->hostname}:{$db->port} \n");
+
+		$this->outputTask->log("- Importing MySQL dump to DB {$dbName} at {$db->host->hostname}:{$db->port} \n");
 		passthru($command, $err);
 		if ($err !== 0) {
-			throw new Exception('- MysqlTask ' . __METHOD__ . '() failed');
+			throw new TaskException(__CLASS__ . '::' .  __METHOD__ . '() failed');
 		}
-		self::log("\n");
+		$this->outputTask->log("\n");
 	}
 
 	/**
@@ -83,13 +117,13 @@ class MysqlTask
 	 * @param $dbName
 	 * @param $options
 	 */
-	public static function mysqlImport(Database $db, $dumpFilePath, $dbName, $options)
+	public function mysqlImport(Database $db, $dumpFilePath, $dbName, $options)
 	{
 		// use --debug-info to output some debug info
-		$cmd = "mysqlimport -P {$db->port} -h {$db->host->hostname} -u {$db->account->username} " .
+		$cmd = $this->cmdMysqlImport . " -P {$db->port} -h {$db->host->hostname} -u {$db->account->username} " .
 			"-p{$db->account->password} {$options} {$dbName} \"{$dumpFilePath}\" 2>&1";
-		self::log("- Importing {$dumpFilePath} into {$dbName} on {$db->host->hostname}\n");
-		self::runCmd($cmd);
-		self::log("\n");
+		$this->outputTask->log("- Importing {$dumpFilePath} into {$dbName} on {$db->host->hostname}\n");
+		$this->commandTask->runCmd($cmd);
+		$this->outputTask->log("\n");
 	}
 }

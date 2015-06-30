@@ -19,7 +19,6 @@ class Host extends Entity
 	/** @var string $privateKeyPath */
 	public $privateKeyPath = '';
 
-
 	/**
 	 * @param $account
 	 * @param $hostname
@@ -27,6 +26,9 @@ class Host extends Entity
 	 */
 	public function __construct($hostname, Account $account = null, $name = '')
 	{
+		if (empty($account)) {
+			$account = null;
+		}
 		$this->account = $account;
 		$this->hostname = $hostname;
 		$this->name = $name;
@@ -35,13 +37,13 @@ class Host extends Entity
 	/**
 	 * Destroy any temporary private keys used in connecting to a host
  	 */
-	public function __destruct()
-	{
-		if (! empty($this->privateKeyPath) && strpos($this->privateKeyPath, BUILD_TMP_DIR) !== FALSE &&
-			is_file($this->privateKeyPath)) {
-			unlink($this->privateKeyPath);
-		}
-	}
+//	public function __destruct()
+//	{
+//		if (! empty($this->privateKeyPath) && strpos($this->privateKeyPath, BUILD_TMP_DIR) !== FALSE &&
+//			is_file($this->privateKeyPath)) {
+//			unlink($this->privateKeyPath);
+//		}
+//	}
 
 	/**
 	 * @param \Primat\Deployer\Entity\Account $account

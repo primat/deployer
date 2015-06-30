@@ -47,12 +47,9 @@ class CliTask
 	 * @param string $promptText
 	 * @return \Primat\Deployer\Entity\Database
 	 */
-	public function promptDatabase($databases = NULL, $promptText = 'Choose a database:')
+	public function promptDatabase($databases, $promptText = 'Choose a database:')
 	{
 		$choices = array();
-		if (empty($databases)) {
-			$databases = Entity::getList('Database', true);
-		}
 		$mapping = array();
 		foreach($databases as $index => $db) {
 			/** @var $db \Primat\Deployer\Entity\Database */
